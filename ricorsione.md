@@ -1,0 +1,184 @@
+# Esempi ricorsione
+### Dato un valore K intero fornito dall’utente, l’obiettivo del programma è di identificare il range di età anagrafica più piccolo per il quale sia possibile identificare un set di K piloti distinti tale per cui:
+1. ciascun pilota faccia parte di una componente connessa distinta, ovvero i piloti non possono essere stati compagni di squadra;
+2. la differenza fra la data di nascita del pilota più “anziano” e quello più “giovane” della coorte selezionata sia
+minimo;
+### Soluzione:
+``` 
+def getListaPilotiOttima(self, k):
+        self._optListPiloti = []
+        self._minDistGiorni = 100*365
+
+        components = list(nx.connected_components(self._graph))
+
+        if len(components) < k:
+                # allora non ho abbastanza componenti connesse da cui pescare, e non posso trovare una sol
+                return None, 0
+
+        parziale = []
+        self._ricorsione(components, k, parziale,0 )
+        return self._optListPiloti, self._minDistGiorni
+
+def _ricorsione(self, components, k, parziale, indexComponente):
+        # condizione di ottimalità
+        if len(parziale) == k:
+                # ho una soluzione accettabile.
+                dateDiNascita = [p.dob for p in parziale]
+                diffEtaPiloti = (max(dateDiNascita) - min(dateDiNascita)).days
+                if diffEtaPiloti < self._minDistGiorni:
+                        self._optListPiloti = copy.deepcopy(parziale)
+                        self._minDistGiorni = diffEtaPiloti
+                return
+
+        #condizione di terminazione
+        #1) esco se l'indice che indica quale comp connessa sto considerando a questa iterazione è diventato maggiore o
+        #uguale al numero di componenti connesse totali, perchè vuol dire che non ho altre componenti connesse da cui pescare
+        #2) l'altro motivo è se non ho abbastanza componenti rimanenti per arrivare a k piloti in parziale
+        if indexComponente >= len(components) or (len(components) - indexComponente) < (k-len(parziale)):
+                return
+
+        # se non sono uscito, allora posso aggiungere ancora piloti. Per questa componente, di indice indexComponente,
+        # provo ad ingaggiare un pilota oppure a non ingaggiare nessuno.
+
+        #caso 1, inserisco un pilota appartenente a questa comp connessa. In questo branch provo tutti i piloti che
+        # fanno parte della componente connessa in esame.
+        componente = components[indexComponente]
+        for pilota in componente:
+                parziale.append(pilota)
+                self._ricorsione(components, k, parziale, indexComponente+1)
+                parziale.pop()
+
+        #caso 2, mi tengo un brach di esplorazione in cui io non ho preso proprio nessuno da questa comonente.
+        self._ricorsione(components, k, parziale, indexComponente+1)
+```
+------------------------------------------------------------------------------------------------------------------------------
+### Si inseriscano nei dropdown “Start Product” ed “End Product” tutti i nodi presenti nel grafo, e si implementi un algoritmo ricorsivo che identifichi un cammino ottimo tale per cui:
+- Il cammino parti dal nodo identificato come Start Product e termini nel nodo identificato come End Product;
+- La lunghezza del cammino sia pari a Lun, valore numerico fornito dall’utente nel campo “Lunghezza
+cammino”;
+- Il cammino attraversi gli archi rispettando i versi;
+- Un nodo non può essere attraversato più volte;
+- La somma dei pesi degli archi deve essere massima.
+### Soluzione:
+```
+def getBestPath(self, lun, start, end):
+        self._bestPath = []
+        self._bestScore = 0
+        parziale = [start]
+        self._ricorsione(parziale, lun, end)
+        return self._bestPath, self._bestScore
+
+def _ricorsione(self, parziale, lun, end):
+        if len(parziale) == lun:
+                if parziale[-1] == end and self._getScore(parziale) > self._bestScore:
+                        self._bestScore = self._getScore(parziale)
+                        self._bestPath = copy.deepcopy(parziale)
+                return
+
+        for n in self._graph.successors(parziale[-1]):
+                if n not in parziale:
+                        parziale.append(n)
+                        self._ricorsione(parziale, lun, end)
+                        parziale.pop()
+
+def _getScore(self, parziale):
+        score = 0
+        for i in range(0, len(parziale)-1):
+                score += self._graph[parziale[i]][parziale[i+1]]["weight"]
+        return score
+```
+--------------------------------------------------------------------------------------------------------------------------------------
+### Selezionare dal corrispondente menu a tendina un artista. Facendo click sul pulsante “Cerca percorso”, individuare il percorso più lungo: Trovare un cammino semplice di lunghezza massima tale che ogni arco successivo abbia peso strettamente crescente.
+### Soluzione:
+```
+# QUESTA è una mia (professore) soluzione verbosa.
+    def getTopLista1(self, source):
+         self._bestListaArt = [source]
+         self._ricorsione1([source], 0)
+         return self._bestListaArt
+
+    def _ricorsione1(self, parziale, pesoCorr):
+         if len(parziale) > len(self._bestListaArt):
+             self._bestListaArt = copy.deepcopy(parziale)
+
+         last = parziale[-1]
+         print("NODE:", last, "PESO CORRENTE:", pesoCorr)
+
+         for _, succ, data in self._grafo.out_edges(last, data=True):
+             pesoArco = data["weight"]
+             print("  CANDIDATO:", succ, "PESO:", pesoArco)
+
+             if succ not in parziale and pesoArco > pesoCorr:
+                 print("  -> SCENDO")
+                 parziale.append(succ)
+                 self._ricorsione1(parziale, pesoArco)
+                 parziale.pop()
+             else:
+                 print("  -> SCARTO")
+
+    def getTopLista(self, source):
+        self._bestListaArt = []
+        parziale = [source]
+        pesoCorr = 0
+        for n in self._grafo.successors(source):
+            if n not in parziale:
+                if self._grafo[source][n]['weight'] > pesoCorr:
+                    # PROBLEMA 1bis :Stessa cosa di sotto.
+                    # pesoCorr = self._grafo[source][n]['weight']
+                    parziale.append(n)
+                    self._ricorsione(parziale, self._grafo[source][n]['weight'])
+                    parziale.pop()
+        return self._bestListaArt
+
+# Soluzione mia
+    def _ricorsione(self, parziale, pesoCorr):
+        #cond Ottimale
+        if len(parziale) > len(self._bestListaArt):
+            self._bestListaArt = copy.deepcopy(parziale)
+        # PROBLEMA2: qui c'era un else. In pratica, quando veniva trovata una soluzione ottima,
+        # l'algoritmo non continuava ad esplorare quella traccia, il che è sbagliato. Non si stratta di una condizione di terminazione.
+        for n in self._grafo.successors(parziale[-1]):
+            if n not in parziale:
+                m = parziale[-1]
+                if self._grafo[m][n]['weight'] > pesoCorr:
+                #PROBLEMA 1: aggiornare il nome della variabile pesoCorr qui va a modificarne il riferimento, per cui
+                # quello che nella nostra logica era il peso dell'ultimo arco, veniva copiato anche ai rami "fratelli".
+                # Va bene passare come parametro il pesoCorr ma non rinominiamolo dentro la ricorsione. Il problema non
+                # è passare il peso corrente invece di calcolarlo on the fly, il problema è dagli lo stesso nome.
+                    # pesoCorr = self._grafo[m][n]['weight']
+                    parziale.append(n)
+                    self._ricorsione(parziale, self._grafo[m][n]['weight'])
+                    parziale.pop()
+```
+-------------------------------------------------------------------------------------------------------------------------
+### Trovare un cammino semplice di lunghezza massima tale che ogni nodo successivo abbia un età strettamente decrescente.
+### Soluzione:
+```
+def getBestPath(self):
+
+        self._bestPath = []
+
+        for start in self._graph.nodes():
+            partial = [start]
+            self._ricorsione(partial)
+
+        return self._bestPath
+
+    def _ricorsione(self, partial):
+
+        if len(partial) > len(self._bestPath):
+            self._bestPath = list(partial)
+
+        current = partial[-1]
+
+        for _, successor in self._graph.edges(current):
+
+            # vincolo: età decrescente
+            if successor not in partial and successor.birth_date > current.birth_date:
+                partial.append(successor)
+
+                self._ricorsione(partial)
+
+                partial.pop()
+```
+
