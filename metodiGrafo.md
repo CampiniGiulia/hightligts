@@ -1,4 +1,4 @@
-# METODI PIù COMUNI PARTE 1
+# METODI PIù COMUNI per i GRAFI
 
 -   **Stampare il numero di componenti connesse:**  ```def getNumCompConnesse(self):  
         compConn = nx.number_connected_components(self._graph)  
@@ -21,5 +21,57 @@
         archi = list(self._graph.edges(data=True))
         archi.sort(key=lambda x: x[2]["weight"], reverse=True)
         return archi[0:3]```
+# Visite
+1. Da un nodo **source** a tutti gli altri, senza obiettivi di minimizzazione:
+   - DFS:
+     - dfs_edges(G[, source, depth_limit, ...]) = Iterate over edges in a depth-first-search (DFS).
+     - dfs_tree(G[, source, depth_limit, ...]) = Returns oriented tree constructed from a depth-first-search from source.
+     - dfs_predecessors(G[, source, depth_limit, ...]) = Returns dictionary of predecessors in depth-first-search from source.
+     - dfs_successors(G[, source, depth_limit, ...]) = Returns dictionary of successors in depth-first-search from source.
+     - dfs_preorder_nodes(G[, source, depth_limit, ...]) = Generate nodes in a depth-first-search pre-ordering starting at source.
+     - dfs_postorder_nodes(G[, source, ...]) = Generate nodes in a depth-first-search post-ordering starting at source.
+     - dfs_labeled_edges(G[, source, depth_limit, ...]) = Iterate over edges in a depth-first-search (DFS) labeled by type.
+   - BFS (dal punto di vista del numero di archi restituitsce i cammini minimi):
+     - bfs_edges(G, source[, reverse, depth_limit, ...]) = Iterate over edges in a breadth-first-search starting at source.
+     - bfs_layers(G, sources) = Returns an iterator of all the layers in breadth-first search traversal.
+     - bfs_tree(G, source[, reverse, depth_limit, ...]) = Returns an oriented tree constructed from of a breadth-first-search starting at source.
+     - bfs_predecessors(G, source[, depth_limit, ...]) = Returns an iterator of predecessors in breadth-first-search from source.
+     - bfs_successors(G, source[, depth_limit, ...]) = Returns an iterator of successors in breadth-first-search from source.
+     - descendants_at_distance(G, source, distance) = Returns all nodes at a fixed distance from source in G.
+     - bfs_labeled_edges(G, sources) = Iterate over edges in a breadth-first search (BFS) labeled by type.
+     - generic_bfs_edges(G, source[, neighbors, ...]) = Iterate over edges in a breadth-first search.
+2. All-source shortest path (AS-SP)
+   - ```floyd_warshall(G, weight='weight')```
+3. Single-source shortest path (SS-SP)
+   - all_pairs_bellman_ford_path_length(G, weight='weight')
+   - single_source_bellman_ford_path(G, source, weight='weight')
+   - dijkstra_path(G, source, target, weight='weight')
+4. Cicli: guardo ultimo pacco di slide
 
-    
+# Libreria
+- nx.Graph()
+- nx.DiGraph()
+- nx.MultiGraph()
+- nx.MultiDiGraph()
+- graph[u][v] per ottenre gli attributi dell'arco
+- g.nodes()
+- g.edges()
+
+# TEORIA GRAFI
+- **undirected** graph:
+  - degree: è il numero degli archi incidenti a un nodo (```Graph.degree(nodo) ```)
+  - è **connesso** se per ogni coppia di vertici che un percorso che li unisce
+  - le componenti connesse sono i sottografi connessi di dimensione massima
+  - hanno dei vicini ```Graph.neighbors(n)[source]```
+- **directed** graph:
+  - in-degree: numero archi entranti nel nodo (```DiGraph.in_degree(nodo)```)
+  - out-degree: numero archi uscenti dal nodo (```DiGraph.out_degree(nodo)```)
+  - degree: somma di in-degree e out-degree (```DiGraph.in_degree(nodo)```)
+  - è fortemente **connesso** se per ogni coppia di vertici che un percorso che li unisce
+  - i vicini si dividono in successori e predecessori (```DiGraph.successors(n) DiGraph.predecessors(n)```)
+- Lunghezza di un cammino = numero di archi -1
+- un grafo è **completo** se per ogni coppia di vertici esiste un arco che li unisce simbolo K_n
+- la **densità** di un grafo è tra il numeor degli archi e il numero totale di archi possibili (completo)
+- **forest**: un grafo non diretto aciclico
+- **tree**: un grafo connesso aciclico
+- **rooted tree**: un albero in cui si individua una radice che conferisce una direzione all'alberp
