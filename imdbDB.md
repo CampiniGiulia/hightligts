@@ -61,6 +61,23 @@ Nel cinema, le relazioni tra le persone (`names`) e i film (`movie`) sono intrin
     - `movie` 1 ─── N `role_mapping`
     - `names` 1 ─── N `role_mapping`
    
+## Funzioni UTILI:
+- REPLACE() — Il "Trova e Sostituisci":
+  - ``` REPLACE(testo_originale, testo_da_cercare, testo_sostitutivo) ```
+  - ``` REPLACE('$ 150', '$ ', '')  -- Risultato: '150' ```
+  - ```REPLACE(REPLACE('Prezzo: $ 50', '$ ', ''), 'Prezzo: ', '') -- Risultato: '50' ```
+- CAST() — Il "Trasformatore di Tipi":
+  - ``` CAST(valore AS nuovo_tipo_di_dato) ```
+  1. Da Testo a Numero Intero:
+  - ``` CAST('123' AS UNSIGNED) -- In MySQL diventa il numero 123 (positivo) ```
+  - ``` CAST('123' AS INT)      -- In Postgres/SQL Server diventa il numero 123 ```
+  2. Da Testo a Numero con Decimali (Frazionario):
+  - ``` CAST('99.90' AS DECIMAL(10,2)) -- Risultato: il numero decimale 99.90 ```
+- Insieme:
+  - ``` SUM(CAST(REPLACE(worlwide_gross_income, '$ ', '') AS UNSIGNED)) ```
+  - ``` SUM(CAST(REPLACE(REPLACE(worlwide_gross_income, '$ ', ''), 'INR ', '') AS UNSIGNED)) ```
+
+
 ## QUERY
   
     
