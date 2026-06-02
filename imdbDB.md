@@ -18,7 +18,8 @@ Diamo un'occhiata alla struttura, dividendola in tre grandi macro-aree:
   - languages: str #Nullable
   - production_company: str #Nullable
   #### Metodi particolari per gestire numeri con le stringhe:
-    - SELECT SUM(CAST(REPLACE(worlwide_gross_income, '$ ', '') AS UNSIGNED)) +++
+    - SELECT SUM(CAST(REPLACE(worlwide_gross_income, '$ ', '') AS UNSIGNED))
+    - SUM(CAST(REPLACE(REPLACE(worlwide_gross_income, '$ ', ''), 'INR ', '') AS UNSIGNED))
     - Where worlwide_gross_income like '$%'
 - `genre` (Genere): Questa tabella associa i film ai loro generi cinematografici (es. Action, Drama, Comedy):
   - movie_id: str #Chiave Primaria (PK), chiave esterna (FK)
@@ -58,7 +59,9 @@ Nel cinema, le relazioni tra le persone (`names`) e i film (`movie`) sono intrin
     - category: str #Specifica il tipo di ruolo
   - Relazioni: Funziona esattamente come la tabella dei registi, ma permette di filtrare per categoria
     - `movie` 1 ─── N `role_mapping`
-    - `names` 1 ─── N `role_mapping`   
+    - `names` 1 ─── N `role_mapping`
+   
+## QUERY
   
     
 
