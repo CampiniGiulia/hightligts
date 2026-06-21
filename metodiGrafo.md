@@ -21,6 +21,13 @@
         archi = list(self._graph.edges(data=True))
         archi.sort(key=lambda x: x[2]["weight"], reverse=True)
         return archi[0:3]```
+- **stampare per tale squadra l’elenco delle squadre adiacenti, ed il peso degli archi corrispondenti, in ordine decrescente di peso:** ```def getDetails(self, team):
+        vicini = self._graph.neighbors(team)
+        viciniTuple = []
+        for v in vicini:
+            viciniTuple.append((v, self._graph[team][v]["weight"]))
+        viciniTuple.sort(key=lambda x: x[1], reverse=True)
+        return viciniTuple``` 
 # Visite
 1. Da un nodo **source** a tutti gli altri, senza obiettivi di minimizzazione:
    - DFS:
