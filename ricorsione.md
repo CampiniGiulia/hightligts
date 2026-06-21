@@ -182,3 +182,12 @@ def getBestPath(self):
                 partial.pop()
 ```
 
+-------------------------------------------------------------------------------------------------------------------------
+### Calcolare un percorso di peso massimo avente le seguenti caratteristiche:
+- Il punto di partenza è il vertice selezionato al punto 1.e.
+- Ogni vertice può comparire una sola volta
+- Il peso degli archi nel percorso deve essere strettamente decrescente.
+
+### Soluzione: CERCO DI CAPIRE (BASEBALL)
+
+
