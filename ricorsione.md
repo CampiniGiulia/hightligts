@@ -190,4 +190,44 @@ def getBestPath(self):
 
 ### Soluzione: CERCO DI CAPIRE (BASEBALL)
 
+-------------------------------------------------------------------------------------------------------------------------
+### Calcolare un percorso di peso massimo avente le seguenti caratteristiche:
+- vertice di partenza è quello selezionato nel punto 1.c
+- peso degli archi nel percorso deve essere strettamente decrescente
+-  un vertice può entrare una volta sola nel percorso
+  
+### Soluzione (prof, ma metterei successor al posto di neighbours):
+```
+def getBestPath(self, startStr):
+        self._bestPath = []
+        self._bestScore = 0
+
+        start = self._idMap[int(startStr)]
+
+        parziale = [start]
+
+        vicini = self._graph.neighbors(start)
+        for v in vicini:
+            parziale.append(v)
+            self._ricorsione(parziale)
+            parziale.pop()
+
+        return self._bestPath, self._bestScore
+    def _ricorsione(self, parziale):
+        if self.getScore(parziale) > self._bestScore:
+            self._bestScore = self.getScore(parziale)
+            self._bestPath = copy.deepcopy(parziale)
+
+        for v in self._graph.neighbors(parziale[-1]):
+            if (v not in parziale and #check if not in parziale
+                    self._graph[parziale[-2]][parziale[-1]]["weight"] >
+                    self._graph[parziale[-1]][v]["weight"]): #check if peso nuovo arco è minore del precedente
+                parziale.append(v)
+                self._ricorsione(parziale)
+                parziale.pop()
+        def getScore(self, listOfNodes):
+                tot = 0
+                for i in range(len(listOfNodes) - 1):
+                    tot += self._graph[listOfNodes[i]][listOfNodes[i + 1]]["weight"]
+```
 
