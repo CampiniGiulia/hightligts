@@ -112,6 +112,8 @@ Questa è la struttura che organizza la musica presente nel negozio
 
 ### Esempi query:
 - Esiste un arco tra l’artista A e l’artista B se almeno un cliente ha acquistato brani di entrambi gli artisti, con verso da A verso B se la popolarità di A è maggiore della popolarità di B. In caso i nodi A e B abbiano la stessa popolarità, aggiungere due archi in entrambi i versi. Si calcoli la popolarità di un artista come la somma di tutti i brani acquistati di quell’artista. Usare le tabelle invoceline e invoce per determinare gli acquisti dei clienti. Il peso dell’arco tra l’artista A e l’artista B è la somma delle rispettive popolarità:
+  
+**mia soluzione**
 ```
 SELECT t1.a1, t2.a2, (t1.tot1+t2.tot2) as peso
 FROM (SELECT a.ArtistId as a1, sum(il.Quantity) as tot1
@@ -128,6 +130,57 @@ and t1.a1 <> t2.a2 and t1.tot1>=t2.tot2 and i.CustomerId=i2.CustomerId  and t.Ge
 group by t1.a1, t2.a2
 order by peso desc
 ```
+**soluzione professore**
+
+query: 
+```
+select i.CustomerId, art.ArtistId, count(*) as ntracks
+                    from invoice i, invoiceline i2, track t, genre g, artist art,album a
+                    where i.InvoiceId  = i2.InvoiceId 
+                    and t.TrackId = i2.TrackId 
+                    and t.AlbumId = a.AlbumId
+                    and g.GenreId = t.GenreId
+                    and art.ArtistId = a.ArtistId 
+                    and g.Name = %s
+                    group by i.CustomerId, art.ArtistId
+```
+model:
+```
+(from collections import defaultdict
+import itertools)
+custom_artist_list = DAO.getCustomerArtistCounts(genere)
+
+        customerMap = defaultdict(dict)
+
+        for customer_id, artist_id, ntracks in custom_artist_list:
+            customerMap[customer_id][artist_id] = ntracks
+
+        artist_popularity = defaultdict(int)
+
+        for customer, artists in customerMap.items():
+            for artist_id, ntracks in artists.items():
+                artist_popularity[artist_id] += ntracks
+
+        for customer_id, artists in customerMap.items():
+
+            for a, b in itertools.combinations(artists.keys(), 2):
+
+                pop_a = artist_popularity[a]
+                pop_b = artist_popularity[b]
+
+                weight = pop_a + pop_b
+
+                if pop_a < pop_b:
+                    self._graph.add_edge(self._idMap[a], self._idMap[b], weight=weight)
+                elif pop_a > pop_b:
+                    self._graph.add_edge(self._idMap[b], self._idMap[a], weight=weight)
+                else:
+                    self._graph.add_edge(self._idMap[a], self._idMap[b], weight=weight)
+                    self._graph.add_edge(self._idMap[b], self._idMap[a], weight=weight)
+
+```
+
+
 -  I vertici sono gli artisti (Artist) che possiedono almeno un brano (Track) appartenente al genere selezionato:
 ```
 SELECT DISTINCT a.*
