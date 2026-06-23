@@ -116,38 +116,24 @@ def _getScore(self, parziale):
              else:
                  print("  -> SCARTO")
 
-    def getTopLista(self, source):
-        self._bestListaArt = []
-        parziale = [source]
-        pesoCorr = 0
-        for n in self._grafo.successors(source):
-            if n not in parziale:
-                if self._grafo[source][n]['weight'] > pesoCorr:
-                    # PROBLEMA 1bis :Stessa cosa di sotto.
-                    # pesoCorr = self._grafo[source][n]['weight']
-                    parziale.append(n)
-                    self._ricorsione(parziale, self._grafo[source][n]['weight'])
-                    parziale.pop()
-        return self._bestListaArt
-
 # Soluzione mia
-    def _ricorsione(self, parziale, pesoCorr):
-        #cond Ottimale
-        if len(parziale) > len(self._bestListaArt):
-            self._bestListaArt = copy.deepcopy(parziale)
-        # PROBLEMA2: qui c'era un else. In pratica, quando veniva trovata una soluzione ottima,
-        # l'algoritmo non continuava ad esplorare quella traccia, il che è sbagliato. Non si stratta di una condizione di terminazione.
-        for n in self._grafo.successors(parziale[-1]):
+   def calcolaPercorso(self, source):
+        self._bestSoluzione = []
+        parziale = [source]
+        self._ricorsione(parziale)
+        return self._bestSoluzione
+
+    def _ricorsione(self, parziale):
+        #condizione ottimale
+        if len(parziale) > len(self._bestSoluzione):
+                self._bestSoluzione = copy.deepcopy(parziale)
+
+        #condizione ricorsiva
+        for n in self._graph.successors(parziale[-1]):
             if n not in parziale:
-                m = parziale[-1]
-                if self._grafo[m][n]['weight'] > pesoCorr:
-                #PROBLEMA 1: aggiornare il nome della variabile pesoCorr qui va a modificarne il riferimento, per cui
-                # quello che nella nostra logica era il peso dell'ultimo arco, veniva copiato anche ai rami "fratelli".
-                # Va bene passare come parametro il pesoCorr ma non rinominiamolo dentro la ricorsione. Il problema non
-                # è passare il peso corrente invece di calcolarlo on the fly, il problema è dagli lo stesso nome.
-                    # pesoCorr = self._grafo[m][n]['weight']
+                if len(parziale)<2 or self._graph[parziale[-1]][n]["weight"] > self._graph[parziale[-2]][parziale[-1]]["weight"]:
                     parziale.append(n)
-                    self._ricorsione(parziale, self._grafo[m][n]['weight'])
+                    self._ricorsione(parziale)
                     parziale.pop()
 ```
 -------------------------------------------------------------------------------------------------------------------------
