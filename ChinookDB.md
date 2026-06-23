@@ -110,6 +110,34 @@ Questa è la struttura che organizza la musica presente nel negozio
 - `Employee` (Ricorsiva) 1 ─── N `Employee`: Nota la freccia che esce da employee e rientra in employee stessa tramite la colonna ReportsTo. Significa che un dipendente ha come capo un altro dipendente (il manager). È una relazione riflessiva (o gerarchica)
 - `Employee` 1 ─── N `Customer`: Un dipendente (nel ruolo di supporto) può assistere molti clienti diversi.
 
+### Esempi query:
+- Esiste un arco tra l’artista A e l’artista B se almeno un cliente ha acquistato brani di entrambi gli artisti, con verso da A verso B se la popolarità di A è maggiore della popolarità di B. In caso i nodi A e B abbiano la stessa popolarità, aggiungere due archi in entrambi i versi. Si calcoli la popolarità di un artista come la somma di tutti i brani acquistati di quell’artista. Usare le tabelle invoceline e invoce per determinare gli acquisti dei clienti. Il peso dell’arco tra l’artista A e l’artista B è la somma delle rispettive popolarità:
+```
+SELECT t1.a1, t2.a2, (t1.tot1+t2.tot2) as peso
+FROM (SELECT a.ArtistId as a1, sum(il.Quantity) as tot1
+FROM Album a, Track t, InvoiceLine il 
+WHERE a.AlbumId = t.AlbumId and il.TrackId = t.TrackId and t.GenreId = 1
+group by a.ArtistId) t1, InvoiceLine il, Invoice i, Album a, Track t,  
+(SELECT a.ArtistId as a2, sum(il.Quantity) as tot2
+FROM Album a, Track t, InvoiceLine il 
+WHERE a.AlbumId = t.AlbumId and il.TrackId = t.TrackId and t.GenreId = 1
+group by a.ArtistId) t2, InvoiceLine il2, Invoice i2, Album a2, Track t3 
+WHERE a.ArtistId = t1.a1 and t.AlbumId = a.AlbumId and t.TrackId = il.TrackId and il.InvoiceId = i.InvoiceId 
+and a2.ArtistId = t2.a2 and t3.AlbumId = a2.AlbumId and t3.TrackId = il2.TrackId and il2.InvoiceId = i2.InvoiceId 
+and t1.a1 <> t2.a2 and t1.tot1>=t2.tot2 and i.CustomerId=i2.CustomerId  and t.GenreId = 1 and t3.GenreId = 1
+group by t1.a1, t2.a2
+order by peso desc
+```
+-  I vertici sono gli artisti (Artist) che possiedono almeno un brano (Track) appartenente al genere selezionato:
+```
+SELECT DISTINCT a.*
+FROM Artist a, Album a2, Track t 
+WHERE a.ArtistId =a2.ArtistId and a2.AlbumId = t.AlbumId 
+and t.GenreId = 2
+```
+
+
+
 
 
 
