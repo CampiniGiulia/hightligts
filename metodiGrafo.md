@@ -1,4 +1,4 @@
-# METODI PIù COMUNI per i GRAFI
+# METODI PIù COMUNI per i GRAFI 
 
 -   **Stampare il numero di componenti connesse:**  ```def getNumCompConnesse(self):  
         compConn = nx.number_connected_components(self._graph)  
@@ -27,7 +27,20 @@
         for v in vicini:
             viciniTuple.append((v, self._graph[team][v]["weight"]))
         viciniTuple.sort(key=lambda x: x[1], reverse=True)
-        return viciniTuple``` 
+        return viciniTuple```
+- **stampare i nodi la cui somma dei pesi degli archi entranti meno la somma dei pesi degli archi uscenti è massima**:
+```def getTopProdotti(self):
+        tupleProdotti = []
+        for nodi in self._graph.nodes:
+            vend = 0
+            for n in self._graph.in_edges(nodi, data=True):
+                vend += n[2]['weight']
+            for n in self._graph.out_edges(nodi, data=True):
+                vend -= n[2]['weight']
+            tupleProdotti.append((nodi, vend))
+        tupleProdotti.sort(key=lambda x: x[1], reverse=True)
+        return tupleProdotti[:5]```
+   
 # Visite
 1. Da un nodo **source** a tutti gli altri, senza obiettivi di minimizzazione:
    - DFS:
