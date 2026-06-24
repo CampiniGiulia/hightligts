@@ -12,6 +12,7 @@
         print(self._annoInizio)
 ```
 ### (versione2) Aggiungere oggetti Option a una lista:
+1.
 ```
 def populate_dd_anno(self):
         """methodo che popola la tendina con tutti gli anni in cui ci sono state vendite,
@@ -37,6 +38,23 @@ def populate_dd_anno(self):
                                                             text="Nessun filtro")],
                                                             on_change=self._controller.read_anno)
         self._controller.populate_dd_anno()``` )
+2.
+```
+retailers = self._model.get_retailers()
+        for retailer in retailers:
+            self._view.dd_retailer.options.append(ft.dropdown.Option(text=retailer.retailer_name,
+                                                                     data=retailer,
+                                                                     on_click=self.read_retailer))
+        self._view.update_page()
+
+```
+                                                                                                                             
+- (nella view è così: ```       self.dd_retailer = ft.Dropdown(width=500,
+                                   hint_text="Filtro per retailer",
+                                   label="retailer",
+                                   options=[ft.dropdown.Option(key="None",
+                                                               text="Nessun filtro", data=None,
+                                                               on_click=self._controller.read_retailer)]) ```)
 
 ### Creazione del grafo + stampa dettagli:
 ```
