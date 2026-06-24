@@ -241,4 +241,75 @@ def getBestPath(self, startStr):
                 for i in range(len(listOfNodes) - 1):
                     tot += self._graph[listOfNodes[i]][listOfNodes[i + 1]]["weight"]
 ```
+-------------------------------------------------------------------------------------------------------------------------
+### Partendo dal grafo costruito nel punto precedente, si vuole identificare il “sotto-campionato più emozionante” di K gare che statisticamente presentano il maggior numero di “imprevisti”. Ai fini di questo punto, si considerino come circuiti validi solamente i circuiti che appartengono alla componente connessa identificata nel punto precedente e nei quali si è corso almeno M volte nel range di anni selezionato. 
+- indice di “imprevedibilità” I di una specifica gara il seguente valore numerico:
+I = 1- nP/nPtot
+dove nP rappresenta il numero di piloti che hanno correttamente tagliato il traguardo a pari giri con il leader in tutte
+le edizioni corse sul circuito selezionato (ovvero lo stesso valore calcolato al punto precedente come componente del peso degli archi), mentre nPtot rappresenta la totalità dei piloti che risultano iscritti alle varie gare (ovvero, la somma delle lunghezze delle liste indipendentemente dalla presenza del valore Null come tempo di percorrenza totale).
+Per valutare l’indice complessivo di imprevedibilità di una lista di circuiti si utilizzi la somma degli indici I delle varie gare inserite nella lista.
+### Soluzione:
+```
+def getCampionatoIdeale(self, soglia, numAnni):
+
+        tic = datetime.now()
+        compConnessa = list(nx.connected_components(self._graph))[0]
+        self._bestScore = 0
+        self._optListCircuiti = []
+        parziale = []
+        rimanenti = copy.deepcopy(compConnessa)
+
+        for c in compConnessa:
+            if len(list(c.results.keys())) >= numAnni:
+                parziale.append(c)
+                rimanenti.remove(c)
+                self._ricorsione(parziale, rimanenti, soglia, numAnni)
+                parziale.pop()
+                rimanenti.add(c)
+
+        listOfScores = []
+        for c in self._optListCircuiti:
+            listOfScores.append(self._calcolaIndiceCircuito(c))
+
+        toc = datetime.now()
+        print(f"Tempo di esecuzione: {toc-tic}")
+        return self._optListCircuiti, self._bestScore, listOfScores
+def _ricorsione(self, parziale, rimanenti, soglia, numAnni):
+        if len(parziale) == soglia:
+            #questa fa sia da condizione di ottimalità sia da condizione di terminazione
+            if self._getScoreSoluzione(parziale) > self._bestScore:
+                self._bestScore = self._getScoreSoluzione(parziale)
+                self._optListCircuiti = copy.deepcopy(parziale)
+            return
+
+        for c in rimanenti:
+            if len(list(c.results.keys())) >= numAnni:
+                parziale.append(c)
+                rimanenti.remove(c)
+                self._ricorsione(parziale, rimanenti, soglia, numAnni)
+                parziale.pop()
+                rimanenti.add(c)
+
+    def _getScoreSoluzione(self, listOfCircuits):
+        listOfScores = []
+        for c in listOfCircuits:
+            listOfScores.append(self._calcolaIndiceCircuito(c))
+
+        return sum(listOfScores)
+def _calcolaIndiceCircuito(self, circuito):
+        nP = 0
+        nPtot = 0
+
+        if len(circuito.results.values()) == 0:
+            return 0 #questo caso non dovrebbe mai accadere perchè questa funzione viene chiamata solo su nodi appartenenti alla componente connessa.
+
+        for r in circuito.results.values():  # per ogni anno prendo tutti i risultati della gara
+            nPtot += len(r)
+            for p in r:  # per ogni pilota
+                if p.time is not None:
+                    nP += 1
+
+        return 1-nP/nPtot
+```
+
 
