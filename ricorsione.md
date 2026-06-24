@@ -138,7 +138,7 @@ def _getScore(self, parziale):
 ```
 -------------------------------------------------------------------------------------------------------------------------
 ### Trovare un cammino semplice di lunghezza massima tale che ogni nodo successivo abbia un età strettamente decrescente.
-### Soluzione:
+### Soluzione prof:
 ```
 def getBestPath(self):
 
@@ -166,6 +166,41 @@ def getBestPath(self):
                 self._ricorsione(partial)
 
                 partial.pop()
+```
+### Soluzione mia:
+```
+    def getPercorso(self):
+        self._bestSoluzione = []
+        parziale = []
+        daVisitare = copy.deepcopy(list(self._graph.nodes))
+        #daVisitare.sort(key=lambda x: x.date_of_birth, reverse=True)
+        for n in daVisitare:
+            parziale.append(n)
+            daVisitare.remove(n)
+            self._ricorsione(parziale, daVisitare)
+            parziale.pop()
+            daVisitare.append(n)
+        return self._bestSoluzione
+
+    def _ricorsione(self, parziale, daVisitare):
+        print("entrato")
+        #cond. ottimalità
+        if len(parziale) > len(self._bestSoluzione):
+            self._bestSoluzione = copy.deepcopy(parziale)
+            print("ottima")
+        #cond. terminazione
+        if len(daVisitare) == 0:
+            print("termina")
+            return
+        for n in self._graph.neighbors(parziale[-1]):
+            if n.date_of_birth > parziale[-1].date_of_birth:
+                if n not in parziale and n in daVisitare:
+                    print("continua")
+                    parziale.append(n)
+                    daVisitare.remove(n)
+                    self._ricorsione(parziale, daVisitare)
+                    parziale.pop()
+                    daVisitare.append(n)
 ```
 
 -------------------------------------------------------------------------------------------------------------------------
