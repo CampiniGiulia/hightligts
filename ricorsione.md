@@ -169,38 +169,28 @@ def getBestPath(self):
 ```
 ### Soluzione mia:
 ```
-    def getPercorso(self):
+        def getPercorso(self):
         self._bestSoluzione = []
         parziale = []
-        daVisitare = copy.deepcopy(list(self._graph.nodes))
-        #daVisitare.sort(key=lambda x: x.date_of_birth, reverse=True)
-        for n in daVisitare:
+        for n in self._graph.nodes():
             parziale.append(n)
-            daVisitare.remove(n)
-            self._ricorsione(parziale, daVisitare)
+            self._ricorsione(parziale)
             parziale.pop()
-            daVisitare.append(n)
         return self._bestSoluzione
 
-    def _ricorsione(self, parziale, daVisitare):
+    def _ricorsione(self, parziale):
         print("entrato")
         #cond. ottimalità
         if len(parziale) > len(self._bestSoluzione):
             self._bestSoluzione = copy.deepcopy(parziale)
             print("ottima")
-        #cond. terminazione
-        if len(daVisitare) == 0:
-            print("termina")
-            return
         for n in self._graph.neighbors(parziale[-1]):
             if n.date_of_birth > parziale[-1].date_of_birth:
-                if n not in parziale and n in daVisitare:
+                if n not in parziale:
                     print("continua")
                     parziale.append(n)
-                    daVisitare.remove(n)
-                    self._ricorsione(parziale, daVisitare)
+                    self._ricorsione(parziale)
                     parziale.pop()
-                    daVisitare.append(n)
 ```
 
 -------------------------------------------------------------------------------------------------------------------------
