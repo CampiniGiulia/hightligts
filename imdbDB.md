@@ -79,7 +79,64 @@ Nel cinema, le relazioni tra le persone (`names`) e i film (`movie`) sono intrin
 
 
 ## QUERY
-  
+ESEMPI:
+- Esiste un arco tra due attori se hanno recitato almeno in uno stesso film. Il peso è pari alla somma degli incassi dei film in comune.
+#### Soluzione mia:
+```
+SELECT t1.aid, t2.aid, sum(t1.inc) as peso
+FROM (SELECT DISTINCT n.id as aid, m.id as fid, CAST(REPLACE(REPLACE(worlwide_gross_income, '$ ', ''), 'INR ', '') AS UNSIGNED) as inc
+FROM ratings r, movie m, role_mapping rm, names n 
+WHERE r.movie_id = m.id and rm.movie_id = m.id and rm.name_id = n.id and m.worlwide_gross_income is not null
+and r.avg_rating between 1.2 and 2.7 and n.date_of_birth is not null) t1,
+(SELECT DISTINCT n.id as aid, m.id as fid, CAST(REPLACE(REPLACE(worlwide_gross_income, '$ ', ''), 'INR ', '') AS UNSIGNED) as inc
+FROM ratings r, movie m, role_mapping rm, names n 
+WHERE r.movie_id = m.id and rm.movie_id = m.id and rm.name_id = n.id and m.worlwide_gross_income is not null
+and r.avg_rating between 1.2 and 2.7 and n.date_of_birth is not null) t2
+where t1.aid < t2.aid and t1.fid=t2.fid 
+group by t1.aid, t2.aid
+order by peso desc
+```
+
+#### Soluzione prof:
+```
+select rm1.name_id as Actor1, rm2.name_id as Actor2, sum( cast(replace(replace(m.worlwide_gross_income, '$', ''),',', '') as unsigned)) as Weight
+from movie m, role_mapping rm1, role_mapping rm2, ratings r, names n1, names n2
+where m.id = rm1.movie_id
+and m.id = rm2.movie_id
+and m.id = r.movie_id
+and rm1.name_id = n1.id
+and rm2.name_id = n2.id
+and n1.date_of_birth IS NOT NULL
+and n2.date_of_birth IS NOT NULL
+and rm1.name_id < rm2.name_id
+and r.avg_rating >= %s
+and r.avg_rating <= %s
+and m.worlwide_gross_income is not null
+and m.worlwide_gross_income like '$%'
+group by rm1.name_id, rm2.name_id
+```
+-  I vertici sono gli attori che hanno recitato nei film che hanno ricevuto una valutazione nel range definito dall’utente (data di nascita valida.
+#### Soluzione mia:
+```
+SELECT DISTINCT n.id, n.name, n.date_of_birth 
+FROM ratings r, movie m, role_mapping rm, names n 
+WHERE r.movie_id = m.id and rm.movie_id = m.id and rm.name_id = n.id 
+and r.avg_rating between %s and %s and n.date_of_birth is not null
+```
+#### soluzione prof:
+```
+select distinct rm.name_id as ActorID, n.name as Name, n.date_of_birth as birth_date
+from movie m, role_mapping rm, ratings r, names n 
+where n.id = rm.name_id 
+and n.date_of_birth IS NOT NULL
+and m.id = rm.movie_id 
+and m.id = r.movie_id 
+and r.avg_rating >= %s
+and r.avg_rating <= %s
+```
+
+
+
     
 
 
