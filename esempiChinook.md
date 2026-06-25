@@ -47,3 +47,9 @@ from Track t
 where t.GenreId = 1 and t.Composer is not null) t2
 where t1.AlbumId = t2.AlbumId and t1.Composer < t2.Composer 
 ```
+4. I nodi sono gli Impiegati (Employee). C'è un arco orientato che va dall'impiegato A all'impiegato B se l'impiegato A fa da supervisore all'impiegato B:
+```
+select distinct e2.EmployeeId as capo, e.EmployeeId as imp
+from Employee e, Employee e2 
+where e.ReportsTo = e2.EmployeeId
+```
