@@ -313,3 +313,61 @@ def _calcolaIndiceCircuito(self, circuito):
 ```
 
 
+-------------------------------------------------------------------------------------------------------------------------
+### Dato il grafo costruito al punto precedente, si vuole identificare un cammino sul grafo costituito da avvistamenti di durata sempre crescente (strettamente crescente) che massimizzi un punteggio composto dai seguenti termini:
+- +100 punti per ogni avvistamento nel cammino
+- +200 punti per ogni avvistamento del cammino che è occorso nello stesso mese dell’avvistamento
+precedente (ovviamente non applicabile al primo avvistamento del cammino, dato che non ha un
+avvistamento che lo precede).
+Inoltre, il cammino può contenere al massimo 3 avvistamenti dello stesso mese.
+### Soluzione (mia):
+```
+       def getAvvistamenti(self):
+        self._bestSoluzione = []
+        self._bestScore = 0
+        parziale = []
+        self._mesiVisitati = dict.fromkeys(range(1,13), 0)
+        for n in self._graph.nodes:
+            parziale.append(n)
+            self._ricorsione(parziale, n.duration)
+            parziale.pop()
+        return self._bestSoluzione, self._bestScore
+
+    def _ricorsione(self, parziale, durataPrec):
+        #cond ottimale
+        if self.score(parziale) > self._bestScore:
+            print("ottimo")
+            self._bestSoluzione = copy.deepcopy(parziale)
+            self._bestScore = self.score(parziale)
+
+        for n in self._graph.neighbors(parziale[-1]):
+            print("continua")
+            if n not in parziale and self._mesiVisitati[n.datetime.month] <= 2 and n.duration > durataPrec:
+                print("aggiunge")
+                parziale.append(n)
+                self._mesiVisitati[n.datetime.month] += 1
+                self._ricorsione(parziale, n.duration)
+                self._mesiVisitati[n.datetime.month] -= 1
+                parziale.pop()
+
+    #sostituito con dict.fromkeys(range(1,13),0)
+    def amm(self, n, parziale):
+        mese = n.datetime.month
+        tot = 0
+        for m in parziale:
+            if m.datetime.month == mese:
+                tot += 1
+        if tot <= 2:
+            return True
+        return False
+
+    def score(self, parziale):
+        tot = 0
+        for n in range(0, len(parziale)-1):
+            if parziale[n].datetime.month == parziale[n+1].datetime.month:
+                tot+=200
+        tot += 100 * len(parziale)
+        return tot
+
+```
+
