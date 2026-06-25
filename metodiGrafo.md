@@ -72,7 +72,35 @@ def getTopProdotti(self):
         archi.sort(key=lambda x: x[1], reverse=True)
         return archi
 ```
+- **determinare la componente connessa del grafo che contiene il vertice selezionato precedentemente e stampare il numero di vertici che la compongono**:
+```
+def getInfoCompConnessa(self, id_oggetto):
+        #cercare la componente connessa che contiene id_oggetto
 
+        if not self.hasNode(id_oggetto):
+            return None
+
+        source = self._idMapAO[id_oggetto]
+
+        #Strategia 1
+        dfsTree = nx.dfs_tree(self._graph, source)
+        print("size connessa con dfs_tree", len(dfsTree.nodes()))
+
+        #Strategia 2
+        dfsPred = nx.dfs_predecessors(self._graph, source)
+        print("size connessa con dfs_predecessors", len(dfsPred.values()))
+
+        #Strategia 3
+        conn = nx.node_connected_component(self._graph, source)
+        print("size connessa con node_connected_component", len(conn))
+
+        return len(conn)
+
+    def hasNode(self, id_oggetto):
+        return id_oggetto in self._idMapAO
+```
+
+  
 # Visite
 1. Da un nodo **source** a tutti gli altri, senza obiettivi di minimizzazione:
    - DFS:
