@@ -1,35 +1,52 @@
 # METODI PIù COMUNI per i GRAFI 
 
--   **Stampare il numero di componenti connesse:**  ```def getNumCompConnesse(self):  
+-   **Stampare il numero di componenti connesse:**
+  ```
+def getNumCompConnesse(self):  
         compConn = nx.number_connected_components(self._graph)  
-        return compConn```
+        return compConn
+```
 
--  **Identificare la componente connessa di dimensione maggiore:** ```def getBestCompConnessa(self):
+-  **Identificare la componente connessa di dimensione maggiore:**
+ ```
+def getBestCompConnessa(self):
             largest_cc = max(nx.connected_components(self._graph), key=len)
-            return largest_cc```
+            return largest_cc
+```
 
-- **... in senso decrescente secondo il grado dei nodi:** ```def getBestDecresc(self):
+- **... in senso decrescente secondo il grado dei nodi:**
+```
+def getBestDecresc(self):
         largest_cc = max(nx.connected_components(self._graph), key=len)
         pilTuple = []
         for n in largest_cc:
             grado = self._graph.degree(n)
             pilTuple.append((n, grado))
         pilTuple.sort(key=lambda x: x[1], reverse=True)
-        return pilTuple```
+        return pilTuple
+```
 
-- **Stampare gli n archi con peso maggiore:** ```def getBestEdges(self):
+- **Stampare gli n archi con peso maggiore:**
+```
+def getBestEdges(self):
         archi = list(self._graph.edges(data=True))
         archi.sort(key=lambda x: x[2]["weight"], reverse=True)
-        return archi[0:3]```
-- **stampare per tale squadra l’elenco delle squadre adiacenti, ed il peso degli archi corrispondenti, in ordine decrescente di peso:** ```def getDetails(self, team):
+        return archi[0:3]
+```
+- **stampare per tale squadra l’elenco delle squadre adiacenti, ed il peso degli archi corrispondenti, in ordine decrescente di peso:**
+```
+ def getDetails(self, team):
         vicini = self._graph.neighbors(team)
         viciniTuple = []
         for v in vicini:
             viciniTuple.append((v, self._graph[team][v]["weight"]))
         viciniTuple.sort(key=lambda x: x[1], reverse=True)
-        return viciniTuple```
+        return viciniTuple
+```
+
 - **stampare i nodi la cui somma dei pesi degli archi entranti meno la somma dei pesi degli archi uscenti è massima**:
-```def getTopProdotti(self):
+```
+def getTopProdotti(self):
         tupleProdotti = []
         for nodi in self._graph.nodes:
             vend = 0
@@ -39,8 +56,23 @@
                 vend -= n[2]['weight']
             tupleProdotti.append((nodi, vend))
         tupleProdotti.sort(key=lambda x: x[1], reverse=True)
-        return tupleProdotti[:5]```
-   
+        return tupleProdotti[:5]
+```
+- **Identificare la componente connessa di dimensione maggiore, e stamparne tutti i nodi, ordinati in senso decrescente di peso massimo degli archi incidenti**: (per il minimo inizializzo a -1 e nell'if faccio entrare con -1)
+```
+    def getMaxComponente(self):
+        maxComp = max(nx.connected_components(self._graph), key=len)
+        archi = []
+        for n in maxComp:
+            pesoMax = 0
+            for i in (self._graph.neighbors(n)):
+                if self._graph[n][i]['weight'] > pesoMax:
+                    pesoMax = self._graph[n][i]['weight']
+            archi.append((n, pesoMax))
+        archi.sort(key=lambda x: x[1], reverse=True)
+        return archi
+```
+
 # Visite
 1. Da un nodo **source** a tutti gli altri, senza obiettivi di minimizzazione:
    - DFS:
