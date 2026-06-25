@@ -36,3 +36,14 @@ WHERE A.CustomerId = B.CustomerId
   AND A.NumeroAcquisti = B.MaxAcquisti) c2
 WHERE c1.customerId <> c2.customerId and c1.GenreId = c2.GenreID
 ```
+3. Vogliamo un grafo dove i nodi sono i Compositori (Track.Composer) di un determinato Genere (es. 'Rock'). Un arco non orientato collega due compositori se hanno tracce che appartengono allo stesso Album:
+```
+SELECT distinct t1.Composer, t2.Composer 
+FROM (select distinct t.Composer, t.AlbumId 
+from Track t
+where t.GenreId = 1 and t.Composer is not null) t1, 
+(select distinct t.Composer, t.AlbumId 
+from Track t
+where t.GenreId = 1 and t.Composer is not null) t2
+where t1.AlbumId = t2.AlbumId and t1.Composer < t2.Composer 
+```
