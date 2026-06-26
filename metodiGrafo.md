@@ -99,6 +99,19 @@ def getInfoCompConnessa(self, id_oggetto):
     def hasNode(self, id_oggetto):
         return id_oggetto in self._idMapAO
 ```
+- **Stampare il numero di componenti debolmente connesse**:
+```
+def get_num_connesse(self):
+        return nx.number_weakly_connected_components(self._grafo)
+```
+- **identificare la componente debolmente connessa di dimensione maggiore, e stamparne i nodi**:
+```
+def get_largest_connessa(self):
+        conn = list(nx.weakly_connected_components(self._grafo))
+        conn.sort(key=lambda x: len(x), reverse=True)
+        return conn[0]
+```
+
 
   
 # Visite
