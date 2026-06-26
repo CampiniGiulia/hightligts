@@ -370,4 +370,53 @@ Inoltre, il cammino può contenere al massimo 3 avvistamenti dello stesso mese.
         return tot
 
 ```
+-------------------------------------------------------------------------------------------------------------------------
+### Dato il grafo costruito al punto precedente, si vuole identificare un cammino che ottimizzi gli avvistamenti fatti in relazione alla distanza percorsa. Questo viene modellato come un punteggio da massimizzare definito come segue:
+- Il punteggio è dato dalla somma totale dei pesi degli archi DIVISO la distanza totale percorsa nel cammino. La distanza nel percorrere un arco può essere calcolata usando la funzione distance_HV fornita già implementata nella classe State.
+Il cammino deve inoltre rispettare i seguenti vincoli:
+- Da un nodo, ci si può spostare solamente verso un nodo con densità di popolazione strettamente
+crescente. La densità di popolazione è calcolata come Population/Area (Colonne del DB)
+### Soluzione (mia):
+```
+    def getBestPercorso(self):
+        self._bestSoluzione = []
+        self._bestScore = 0
+        parziale = []
+        for n in list(self._graph.nodes):
+            parziale.append(n)
+            self._ricorsione(parziale, self._densita(n))
+            parziale.pop()
+        listaTuple = []
+        for n in self._bestSoluzione:
+            listaTuple.append((n, self._densita(n)))
+        return self._bestSoluzione, self._bestScore, listaTuple
+
+    def _ricorsione(self, parziale, densita):
+        if self._score(parziale) > self._bestScore:
+            self._bestSoluzione = copy.deepcopy(parziale)
+            self._bestScore = self._score(parziale)
+        for n in self._graph.neighbors(parziale[-1]):
+            if self._densita(n) > densita and n not in parziale:
+                parziale.append(n)
+
+                self._ricorsione(parziale, self._densita(n))
+                parziale.pop()
+
+
+    def _densita(self, n):
+        return n.Population/n.Area
+
+    def _score(self, parziale):
+        if len(parziale) <2:
+            return 0
+        pesoTot = 0
+        distTot = 0
+        for i in range(0, len(parziale)-1):
+            pesoTot += self._graph[parziale[i]][parziale[i+1]]["weight"]
+            distTot += parziale[i].distance_HV(parziale[i+1])
+        if distTot != 0:
+            return pesoTot / distTot
+        else:
+            return 0
+```
 
