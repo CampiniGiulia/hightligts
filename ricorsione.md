@@ -51,6 +51,9 @@ def _ricorsione(self, components, k, parziale, indexComponente):
         #caso 2, mi tengo un brach di esplorazione in cui io non ho preso proprio nessuno da questa comonente.
         self._ricorsione(components, k, parziale, indexComponente+1)
 ```
+
+#### Nel controllore per trovare il pilota più giovane: youngest = min(best_path, key=lambda x: x.dob)
+
 ------------------------------------------------------------------------------------------------------------------------------
 ### Si inseriscano nei dropdown “Start Product” ed “End Product” tutti i nodi presenti nel grafo, e si implementi un algoritmo ricorsivo che identifichi un cammino ottimo tale per cui:
 - Il cammino parti dal nodo identificato come Start Product e termini nel nodo identificato come End Product;
