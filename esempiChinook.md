@@ -21,6 +21,29 @@
     WHERE t1.ArtistId < t2.ArtistId and t1.PlaylistId = t2.PlaylistId
     group by t1.ArtistId, t2.ArtistId
     ```
+  2. Il Grafo dell'Internazionalizzazione
+    - I Vertici (Nodi): Tutte le Nazioni (Country) distinte in cui risiede almeno un cliente:
+    ```
+    SELECT distinct c.Country 
+    FROM Customer c 
+    ```
+    - Gli Archi: Esiste un arco tra la Nazione A e la Nazione B se esiste almeno un artista che ha venduto brani in entrambe le nazioni. Il Peso dell'arco: Il numero di artisti unici che hanno venduto sia nella nazione A sia nella nazione B:
+    ```
+    SELECT t1.Country, t2.Country, count( distinct t1.ArtistId ) as peso
+    FROM (SELECT distinct a.ArtistId, c.Country 
+    FROM Customer c, Invoice i, InvoiceLine il, Track t, Album a 
+    WHERE c.CustomerId = i.CustomerId and il.InvoiceId = i.InvoiceId and il.TrackId = t.TrackId and t.AlbumId = a.AlbumId 
+    ) t1,
+    (SELECT distinct a.ArtistId, c.Country 
+    FROM Customer c, Invoice i, InvoiceLine il, Track t, Album a 
+    WHERE c.CustomerId = i.CustomerId and il.InvoiceId = i.InvoiceId and il.TrackId = t.TrackId and t.AlbumId = a.AlbumId 
+    ) t2
+    WHERE t1.Country < t2.Country and t1.ArtistId = t2.ArtistId 
+    group by t1.Country, t2.Country
+    ```
+
+
+
 - Tipologia: Grafo Orientato, Non Pesato
     1. Vogliamo mappare la struttura organizzativa interna dell'azienda.
     - I Vertici (Nodi): Tutti i dipendenti (Employee) presenti nel database:
@@ -56,6 +79,59 @@
     WHERE t1.CustomerId = t2.CustomerId and t1.GenreId <> t2.GenreId and t1.InvoiceDate < t2.InvoiceDate 
     GROUP BY t1.GenreId, t2.GenreId
     ```
+  2. Il Flusso di Consumo Multimediale
+    - I Vertici (Nodi): Tutti i tipi di media (MediaType) disponibili nel database:
+    ```
+    SELECT distinct mt.*
+    FROM MediaType mt
+    ```
+
+    - Gli Archi: Esiste un arco orientato dal tipo di media X al tipo di media Y se lo stesso cliente ha acquistato prima un brano del tipo X e successivamente un brano del tipo Y.  Il Peso dell'arco: Quante volte questa transizione temporale  è avvenuta considerando tutti i clienti, limitatamente al genere selezionato:
+(caso si selfloop):
+```
+SELECT t1.MediaTypeId, t2.MediaTypeId, COUNT(*) AS peso
+FROM 
+    (SELECT i.InvoiceDate, i.CustomerId, t.MediaTypeId, il.InvoiceLineId
+     FROM Invoice i, InvoiceLine il, Track t 
+     WHERE i.InvoiceId = il.InvoiceId 
+       AND il.TrackId = t.TrackId 
+       AND t.GenreId = 1) t1,
+    (SELECT i.InvoiceDate, i.CustomerId, t.MediaTypeId, il.InvoiceLineId
+     FROM Invoice i, InvoiceLine il, Track t 
+     WHERE i.InvoiceId = il.InvoiceId 
+       AND il.TrackId = t.TrackId 
+       AND t.GenreId = 1) t2
+WHERE t1.CustomerId = t2.CustomerId 
+  -- Condizione temporale robusta: 
+  -- Se le date sono diverse, vince la data minore. 
+  -- Se la data è identica (stessa fattura), usiamo l'InvoiceLineId per capire quale traccia è stata inserita prima!
+  AND (t1.InvoiceDate < t2.InvoiceDate OR (t1.InvoiceDate = t2.InvoiceDate AND t1.InvoiceLineId < t2.InvoiceLineId))
+GROUP BY t1.MediaTypeId, t2.MediaTypeId
+```
+(caso no selfloop)
+```
+SELECT t1.MediaTypeId, t2.MediaTypeId, COUNT(*) AS peso
+FROM 
+    (SELECT i.InvoiceDate, i.CustomerId, t.MediaTypeId, il.InvoiceLineId
+     FROM Invoice i, InvoiceLine il, Track t 
+     WHERE i.InvoiceId = il.InvoiceId 
+       AND il.TrackId = t.TrackId 
+       AND t.GenreId = 1) t1,
+    (SELECT i.InvoiceDate, i.CustomerId, t.MediaTypeId, il.InvoiceLineId
+     FROM Invoice i, InvoiceLine il, Track t 
+     WHERE i.InvoiceId = il.InvoiceId 
+       AND il.TrackId = t.TrackId 
+       AND t.GenreId = 1) t2
+WHERE t1.CustomerId = t2.CustomerId and t1.MediaTypeId <> t2.MediaTypeId
+  -- Condizione temporale robusta: 
+  -- Se le date sono diverse, vince la data minore. 
+  -- Se la data è identica (stessa fattura), usiamo l'InvoiceLineId per capire quale traccia è stata inserita prima!
+  AND (t1.InvoiceDate < t2.InvoiceDate OR (t1.InvoiceDate = t2.InvoiceDate AND t1.InvoiceLineId < t2.InvoiceLineId))
+GROUP BY t1.MediaTypeId, t2.MediaTypeId
+```
+
+
+    
 - Tipologia: Grafo Non Orientato, Pesato
     1. Un utente seleziona una Nazione (es. "USA" o "Brazil") da un menu a tendina.
     - I Vertici (Nodi): Tutti i clienti (Customer) residenti in quella specifica nazione:
