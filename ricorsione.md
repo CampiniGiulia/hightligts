@@ -419,4 +419,45 @@ crescente. La densità di popolazione è calcolata come Population/Area (Colonne
         else:
             return 0
 ```
+-------------------------------------------------------------------------------------------------------------------------
+### A partire dal grafo definito al punto 1, si vuole implementare una procedura ricorsiva che identifichi il cammino più lungo che minimizza la somma dei pesi del percorso, e con le seguenti caratteristiche:
+- Un nodo può essere attraversato una sola volta.
+- Gli archi possono essere attraversati solo nella loro direzione di percorrenza
+- Nel cammino, non ci possono essere due geni consecutivi con lo stesso valore del campo Essential
+- Si possono attraversare solo archi di peso crescente (ovvero ogni nuovo arco percorso deve avere
+peso >= del precedente).
+```
+    def getBestPath(self):
+        self._bestSoluzione = []
+        self._bestScore = float('inf')
+        parziale = []
+        for n in self._graph.nodes:
+            parziale.append(n)
+            self._ricorsione(parziale, float('inf'))
+            parziale.pop()
+        return self._bestSoluzione, self._bestScore
+
+    def _ricorsione(self, parziale, peso):
+        if len(parziale) > len(self._bestSoluzione):
+            self._bestSoluzione = copy.deepcopy(parziale)
+            self._bestScore= self._score(parziale)
+
+        elif len(parziale) == len(self._bestSoluzione):
+            if (self._score(parziale)<self._bestScore):
+                self._bestSoluzione = copy.deepcopy(parziale)
+                self._bestScore= self._score(parziale)
+
+        for n in self._graph.successors(parziale[-1]):
+            if n not in parziale:
+                if n.Essential != parziale[-1].Essential and self._graph[parziale[-1]][n]["weight"] >= peso:
+                    parziale.append(n)
+                    self._ricorsione(parziale, self._graph[parziale[-1]][n]["weight"])
+                    parziale.pop()
+
+    def _score(self, parziale):
+        tot = 0
+        for n in range(0, len(parziale)-1):
+            tot += self._graph[parziale[n]][parziale[n+1]]["weight"]
+        return tot
+```
 
