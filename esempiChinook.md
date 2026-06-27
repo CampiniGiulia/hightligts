@@ -205,6 +205,81 @@ where a.AlbumId = t.albumID and t.TrackId = pt.TrackId
 group by a.ArtistId, pt.PlaylistId) t2
 where t1.ArtistId < t2.ArtistId and t1.PlaylistId = t2.PlaylistId 
 group by t1.ArtistId, t2.ArtistId
-``
+```
+# Esempi archi in python:
+1. artisti e playslist:
+  - I Vertici (Nodi): Tutti gli Artisti (Artist) che hanno almeno un brano inserito in una qualsiasi Playlist:
+  ```
+  SELECT  distinct a.*
+  FROM Artist a, Album a2, Track t, PlaylistTrack pt   
+  WHERE a.ArtistId = a2.ArtistId and a2.AlbumId = t.AlbumId  and t.TrackId = pt.TrackId 
+  ```
+  - Gli Archi: Esiste un arco non orientato tra l'Artista A e l'Artista B se compaiono all'interno della stessa identica Playlist.  Il Peso dell'arco: Il numero di playlist distinte in cui i due artisti co-esistono. (La query è poco efficiente quindi uso python):
+  Nel db:
+  ```
+  SELECT  a.ArtistId, pt.PlaylistId 
+  FROM Artist a, Album a2, Track t, PlaylistTrack pt   
+  WHERE a.ArtistId = a2.ArtistId and a2.AlbumId = t.AlbumId  and t.TrackId = pt.TrackId 
+  
+  ```
+  In python:
+  ```
+  # In model.py
+from collections import defaultdict
+import itertools
+from database.DAO import DAO
+
+class Model:
+    def __init__(self):
+        self._graph = nx.Graph() # Il nostro grafo non orientato
+
+    def build_graph(self):
+        # 1. Recuperiamo la lista di tuple dal DAO
+        lista_connessioni = DAO.get_playlist_artists()
+        
+        # 2. RAGGRUPPAMENTO: Creiamo una mappa dove la chiave è la playlist 
+        # e il valore è un INSIEME (set) di artisti presenti in quella playlist.
+        # Usiamo il set() perché se un artista ha più canzoni nella stessa playlist,
+        # inserendolo nel set salvaguardiamo l'unicità (add fa l'effetto del DISTINCT).
+        playlist_map = defaultdict(set)
+        for playlist_id, artist_id in lista_connessioni:
+            playlist_map[playlist_id].add(artist_id)
+            
+        # 3. CALCOLO COMBINATORIO DEL PESO:
+        # Creiamo un dizionario di frequenza per contare quante playlist condividono le coppie.
+        # Chiave: (id_artista1, id_artista2) -> Valore: quante playlist hanno in comune
+        coppie_peso = defaultdict(int)
+        
+        # Iteriamo su ogni singola playlist memorizzata nella nostra mappa
+        for playlist_id, artisti_in_playlist in playlist_map.items():
+            
+            # Se nella playlist c'è solo 1 artista (o nessuno), non può esserci un arco
+            if len(artisti_in_playlist) > 1:
+                
+                # ORDINA GLI ID: Trasformiamo il set in una lista e la ordiniamo numericamente.
+                # Questo è CRUCIALE per i grafi non orientati: l'artista 4 e l'artista 10 
+                # compariranno sempre come coppia ordinata (4, 10) e MAI come (10, 4).
+                # Questo simula perfettamente il filtro SQL "t1.ArtistId < t2.ArtistId".
+                artisti_ordinati = sorted(list(artisti_in_playlist))
+                
+                # GENERAZIONE COPPIE: itertools.combinations prende la lista ordinata e genera
+                # tutte le combinazioni uniche possibili a coppie di 2 senza ripetizioni.
+                # Es: se la lista è [2, 5, 8], genererà: (2,5), (2,8), (5,8)
+                for a1, a2 in itertools.combinations(artisti_ordinati, 2):
+                    # Incrementiamo il contatore di quante volte questa specifica coppia si incontra
+                    coppie_peso[(a1, a2)] += 1
+                    
+        # 4. AGGIUNTA DEGLI ARCHI NEL GRAFO:
+        # Ora che abbiamo scansionato tutte le playlist, inseriamo gli archi definitivi
+        for (a1, a2), peso in coppie_peso.items():
+            # Aggiungiamo l'arco con il peso accumulato
+            self._graph.add_edge(a1, a2, weight=peso)
+            
+        print(#_nodes()}")
+        print(#_edges()}")
+  ```
+
+
+
 
 
