@@ -59,13 +59,51 @@ retailers = self._model.get_retailers()
 ### Creazione del grafo + stampa dettagli:
 ```
         self._model.buildGraph()
-        self.grafo = True
+        self.grafoCreato = True
         n, e = self._model.getDetails()
         self._view.txt_result.controls.clear()
         self._view.txt_result.controls.append(
             ft.Text(f"Grafo creato: "))
         self._view.txt_result.controls.append(
-            ft.Text(f"Numero di nodi: {n} \nNumero di archi: {e}"))
+            ft.Text(f"Numero di nodi: {n} Numero di archi: {e}"))
         self._view.update_page()
 ```
+### datePickers utilizzati per indicare un range temporale di interesse:
+- nella view:
+```
+self._dp1 = ft.DatePicker(
+            on_change=lambda e: print(f"Giorno selezionato: {self._dp1.value}"),
+            on_dismiss=lambda e: print("Data non selezionata")
+        )
+
+        self._page.overlay.append(self._dp1)
+        self._btnCal1 = ft.ElevatedButton("Start date",
+                                              icon=ft.icons.CALENDAR_MONTH,
+                                              on_click=lambda _: self._dp1.pick_date())
+
+        self._dp2 = ft.DatePicker(
+            on_change=lambda e: print(f"Giorno selezionato: {self._dp2.value}"),
+            on_dismiss=lambda e: print("Data non selezionata")
+        )
+        self._page.overlay.append(self._dp2)
+        self._btnCal2 = ft.ElevatedButton("End date",
+                                              icon=ft.icons.CALENDAR_MONTH,
+                                              on_click=lambda _: self._dp2.pick_date())
+
+        self._controller.setDates()
+```
+- nel controller:
+```
+    def setDates(self):
+        first, last = self._model.getDateRange()
+
+        self._view._dp1.first_date = datetime.date(first.year, first.month, first.day)
+        self._view._dp1.last_date = datetime.date(last.year, last.month, last.day)
+        self._view._dp1.current_date = datetime.date(first.year, first.month, first.day)
+
+        self._view._dp2.first_date = datetime.date(first.year, first.month, first.day)
+        self._view._dp2.last_date = datetime.date(last.year, last.month, last.day)
+        self._view._dp2.current_date = datetime.date(last.year, last.month, last.day)
+```
+
 
