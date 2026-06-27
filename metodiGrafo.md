@@ -110,6 +110,9 @@ def get_largest_connessa(self):
         conn = list(nx.weakly_connected_components(self._grafo))
         conn.sort(key=lambda x: len(x), reverse=True)
         return conn[0]
+def get_largest_connessa(self):
+    # max() trova direttamente l'insieme con il maggior numero di elementi
+    return max(nx.weakly_connected_components(self._grafo), key=len)
 ```
 - **I 5 nodi col maggiore numero di archi uscenti col numero di archi uscenti ed il peso complessivo di
 questi archi (la somma dei loro pesi). I nodi devono essere stampati in ordine decrescente per numero di archi uscenti.**:
