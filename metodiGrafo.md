@@ -111,6 +111,21 @@ def get_largest_connessa(self):
         conn.sort(key=lambda x: len(x), reverse=True)
         return conn[0]
 ```
+- **I 5 nodi col maggiore numero di archi uscenti col numero di archi uscenti ed il peso complessivo di
+questi archi (la somma dei loro pesi). I nodi devono essere stampati in ordine decrescente per numero di archi uscenti.**:
+```
+    def get5BestNodi(self):
+        listaTuple = []
+        for n in self._graph.nodes:
+            nArchi = 0
+            totPeso = 0
+            for i in self._graph.out_edges(n, data=True):
+                nArchi += 1
+                totPeso += i[2]['weight']
+            listaTuple.append((n, nArchi, totPeso))
+        listaTuple.sort(key=lambda x: x[1], reverse=True)
+        return listaTuple[:5]
+```
 
 
   
