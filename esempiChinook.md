@@ -1,4 +1,114 @@
 # Esempi di query CHINOOK
+- Tipologia: Grafo Non Orientato, Pesato
+  1. Un utente seleziona un Genere Musicale (es. "Rock") da un menu a tendina.
+    - I Vertici (Nodi): Tutti gli artisti (Artist) che hanno pubblicato almeno un brano (Track) del genere selezionato:
+    ```
+    SELECT distinct a.* 
+    FROM Artist a, Album a2, Track t   
+    WHERE a.ArtistId = a2.ArtistId and a2.AlbumId = t.albumID and t.GenreId = 1
+    ```
+    - Gli Archi: Esiste un arco non orientato tra l'artista A e l'artista B se hanno almeno un brano (del genere selezionato) inserito nella stessa Playlist (Playlist).Il Peso dell'arco: Il numero di playlist distinte in cui compaiono brani di entrambi gli artisti (sempre limitatamente a quel genere):
+    ```
+    SELECT t1.ArtistId, t2.ArtistId, count(distinct t1.PlaylistId ) as peso
+    FROM (SELECT distinct a.ArtistId, pt.PlaylistId 
+    FROM Artist a, Album a2, Track t, PlaylistTrack pt    
+    WHERE a.ArtistId = a2.ArtistId and a2.AlbumId = t.albumID and t.GenreId = 1
+    and pt.TrackId = t.TrackId) t1,
+    (SELECT distinct a.ArtistId, pt.PlaylistId 
+    FROM Artist a, Album a2, Track t, PlaylistTrack pt    
+    WHERE a.ArtistId = a2.ArtistId and a2.AlbumId = t.albumID and t.GenreId = 1
+    and pt.TrackId = t.TrackId) t2
+    WHERE t1.ArtistId < t2.ArtistId and t1.PlaylistId = t2.PlaylistId
+    group by t1.ArtistId, t2.ArtistId
+    ```
+- Tipologia: Grafo Orientato, Non Pesato
+    1. Vogliamo mappare la struttura organizzativa interna dell'azienda.
+    - I Vertici (Nodi): Tutti i dipendenti (Employee) presenti nel database:
+        ```
+        SELECT distinct e.*
+        FROM Employee e 
+        ```
+
+    - Gli Archi: Esiste un arco orientato che va dal dipendente A al dipendente B (A $\rightarrow$ B) se il dipendente A è il capo diretto (superiore) del dipendente B.Il Peso dell'arco: Non pesato (semplice connessione gerarchica):
+        ```
+        SELECT distinct e2.EmployeeId, e.EmployeeId 
+        FROM Employee e, Employee e2 
+        WHERE e.ReportsTo = e2.EmployeeId 
+        ```
+
+- Tipologia: Grafo Orientato, Pesato
+    1. Vogliamo capire quali generi musicali portano all'acquisto di altri generi.
+    - I Vertici (Nodi): Tutti i generi musicali (Genre) che hanno registrato almeno una vendita.
+    ```
+    SELECT distinct g.*
+    FROM Genre g, Track t, InvoiceLine il 
+    WHERE g.GenreId = t.GenreId  and t.TrackId = il.TrackId
+    ```      
+    - Gli Archi: Esiste un arco orientato dal genere X al genere Y (X $\rightarrow$ Y) se lo stesso cliente ha acquistato prima un brano di genere X e, in una fattura successiva (con data maggiore), ha acquistato un brano di genere Y.Il Peso dell'arco: Il numero di volte in cui si è verificata questa sequenza temporale (X poi Y) tra tutti i clienti.
+    ```
+    SELECT t1.GenreId, t2.GenreId, count(*) as peso
+    FROM (SELECT g.GenreId, i.CustomerId, i.InvoiceDate 
+    FROM Genre g, Track t, InvoiceLine il, Invoice i  
+    WHERE g.GenreId = t.GenreId  and t.TrackId = il.TrackId and i.InvoiceId = il.InvoiceId) t1,
+    (SELECT g.GenreId, i.CustomerId, i.InvoiceDate 
+    FROM Genre g, Track t, InvoiceLine il, Invoice i  
+    WHERE g.GenreId = t.GenreId  and t.TrackId = il.TrackId and i.InvoiceId = il.InvoiceId ) t2
+    WHERE t1.CustomerId = t2.CustomerId and t1.GenreId <> t2.GenreId and t1.InvoiceDate < t2.InvoiceDate 
+    GROUP BY t1.GenreId, t2.GenreId
+    ```
+- Tipologia: Grafo Non Orientato, Pesato
+    1. Un utente seleziona una Nazione (es. "USA" o "Brazil") da un menu a tendina.
+    - I Vertici (Nodi): Tutti i clienti (Customer) residenti in quella specifica nazione:
+    ```
+    SELECT distinct c.*
+    FROM Customer c 
+    WHERE c.Country = "Brazil"
+    ```
+
+    - Gli Archi: Esiste un arco non orientato tra il cliente A e il cliente B se hanno acquistato almeno un brano dello stesso artista (Artist). Il Peso dell'arco: Il numero totale di brani in comune acquistati dai due clienti (la somma delle canzoni dell'artista/i condiviso/i comprate da entrambi: (caso 1: non conto due volte le tracce uguali comprate da entrambi)
+
+    ```
+    SELECT t3.id1, t3.id2, (t3.numCanzTot - COALESCE(t4.numCanzComune, 0)) as peso 
+    FROM (SELECT t1.CustomerId as id1, t2.CustomerId as id2, (count( distinct t1.TrackId ) + count(distinct t2.TrackId )) as numCanzTot
+    fROM (SELECT c.CustomerId, a.ArtistId, t.TrackId 
+    FROM Customer c, Invoice i, InvoiceLine il, Track t, Album a 
+    WHERE c.CustomerId = i.CustomerId and i.InvoiceId = il.InvoiceId and il.TrackId = t.TrackId and t.AlbumId = a.AlbumId 
+    and c.Country = "Brazil") t1,
+    (SELECT c.CustomerId, a.ArtistId, t.TrackId 
+    FROM Customer c, Invoice i, InvoiceLine il, Track t, Album a 
+    WHERE c.CustomerId = i.CustomerId and i.InvoiceId = il.InvoiceId and il.TrackId = t.TrackId and t.AlbumId = a.AlbumId 
+    and c.Country = "Brazil") t2
+    WHERE t1.ArtistId = t2.ArtistId and t1.CustomerId < t2.CustomerId 
+    GROUP BY t1.CustomerId, t2.CustomerId) t3
+    LEFT JOIN (SELECT t1.CustomerId as id1, t2.CustomerId as id2, (count(distinct t1.TrackId )) as numCanzComune
+    fROM (SELECT c.CustomerId, a.ArtistId, t.TrackId 
+    FROM Customer c, Invoice i, InvoiceLine il, Track t, Album a 
+    WHERE c.CustomerId = i.CustomerId and i.InvoiceId = il.InvoiceId and il.TrackId = t.TrackId and t.AlbumId = a.AlbumId 
+    and c.Country = "Brazil") t1,
+    (SELECT c.CustomerId, a.ArtistId, t.TrackId 
+    FROM Customer c, Invoice i, InvoiceLine il, Track t, Album a 
+    WHERE c.CustomerId = i.CustomerId and i.InvoiceId = il.InvoiceId and il.TrackId = t.TrackId and t.AlbumId = a.AlbumId 
+    and c.Country = "Brazil") t2
+    WHERE t1.ArtistId = t2.ArtistId and t1.CustomerId < t2.CustomerId and t1.TrackId = t2.TrackId 
+    GROUP BY t1.CustomerId, t2.CustomerId) t4 on t3.id1 =t4.id1 and t3.id2 = t4.id2 
+    ```
+    (caso 2: conto due volte le tracce uguali comprate da entrambi)
+    ```
+    SELECT t1.CustomerId, t2.CustomerId, (count(distinct t1.TrackId ) + count( distinct t2.TrackId )) as numCanzTot
+    fROM (SELECT c.CustomerId, a.ArtistId, t.TrackId 
+    FROM Customer c, Invoice i, InvoiceLine il, Track t, Album a 
+    WHERE c.CustomerId = i.CustomerId and i.InvoiceId = il.InvoiceId and il.TrackId = t.TrackId and t.AlbumId = a.AlbumId 
+    and c.Country = "Brazil") t1,
+    (SELECT c.CustomerId, a.ArtistId, t.TrackId 
+    FROM Customer c, Invoice i, InvoiceLine il, Track t, Album a 
+    WHERE c.CustomerId = i.CustomerId and i.InvoiceId = il.InvoiceId and il.TrackId = t.TrackId and t.AlbumId = a.AlbumId 
+    and c.Country = "Brazil") t2
+    WHERE t1.ArtistId = t2.ArtistId and t1.CustomerId < t2.CustomerId 
+    GROUP BY t1.CustomerId, t2.CustomerId
+    ```
+
+
+
 1. Creare un grafo in cui i nodi sono gli Artisti (Artist) e un arco collega due artisti se compaiono entrambi all'interno di almeno una stessa Playlist. Il peso dell'arco è dato dal numero di playlist distinte che hanno in comune:
 ```
 SELECT t1.ArtistId, t2.ArtistId, count(distinct t1.PlaylistId ) as peso
