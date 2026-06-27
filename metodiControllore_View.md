@@ -55,6 +55,16 @@ retailers = self._model.get_retailers()
                                    options=[ft.dropdown.Option(key="None",
                                                                text="Nessun filtro", data=None,
                                                                on_click=self._controller.read_retailer)]) ```)
+### Versione 3: 
+```
+def fillDDYear(self):
+        years = self._model.getYears()
+        years.sort(reverse=True)
+        for year in years:
+            self._view._ddAnno1.options.append(ft.dropdown.Option(year))
+            self._view._ddAnno2.options.append(ft.dropdown.Option(year))
+        self._view.update_page()
+```
 
 ### Creazione del grafo + stampa dettagli:
 ```
