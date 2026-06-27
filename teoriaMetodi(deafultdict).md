@@ -5,6 +5,12 @@
 - Il defaultdict risolve questo problema: quando cerchi una chiave che non c'è, la crea automaticamente inizializzandola con un "valore di default" che decidi tu:
   - defaultdict(set): Il valore di default è un insieme vuoto (set()), con il set si eliminano i duplicati (come distinct).Se scrivi playlist_map[12].add("ArtistaA") e la playlist 12 non è ancora mai stata registrata, Python: Crea la chiave 12. Le assegna un set() vuoto. Ci aggiunge "ArtistaA"
   - defaultdict(int): Il valore di default è lo zero (0). Se scrivi coppie_peso[("A", "B")] += 1 e quella coppia di artisti non si è mai incontrata prima, Python: Crea la chiave ("A", "B"). Inizializza il valore a 0. Somma 1 (il valore diventa 1).
+## dict.fromkeys(iterabile, valore_iniziale)
+- Questo metodo è fantastico se usi valori immutabili come lo zero (0), stringhe o None. Non usarlo mai se vuoi inizializzare il dizionario con delle liste vuote, tipo dict.fromkeys(range(1, 5), []) --> usa la Dict Comprehension:
+```
+# Questo è sicuro al 100% perché crea una lista nuova a ogni ciclo
+mio_dizionario = {mese: [] for mese in range(1, 13)}
+```
 ## Iterare sui dizionari:
 - playlist_map.items(): Un dizionario memorizza i dati in coppie formate da una chiave e un valore, il metodo .items() serve a estrarre contemporaneamente sia la chiave che il valore per poterci fare un ciclo for
 - popolarita_artisti.keys(): cicla solo sulle chiavi del dizionario
@@ -70,4 +76,23 @@ print(voti) # Output: [18, 24, 30]
 # ERRORE DA EVITARE:
 # x = voti.sort() --> x conterrà None!
 ```
+## List Comprehension
+- [ COSA_VOGLIO_SALVARE  for  ELEMENTO  in  COLLEZIONE  if  CONDIZIONE ]
+```
+id_brani = [t.track_id for t in lista_tracce if t.milliseconds > 180000]
+```
+## Dict Comprehension
+```
+popolarita_iniziale = {artista: 0 for artista in lista_artisti}
+```
+## Set Comprehension
+```
+nazioni_uniche = {f.billing_country for f in lista_fatture if f.billing_country is not None}
+```
+## if-else (Operatore Ternario)
+```
+# Se il brano costa più di 1$, scrivi "Premium", altrimenti "Standard"
+tag_prezzi = ["Premium" if t.unit_price > 1.00 else "Standard" for t in lista_tracce]
+```
+
 
