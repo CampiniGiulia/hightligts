@@ -22,3 +22,34 @@ def getCammino(self, sourceStr):
 
         return lp
 ```
+### Calcola Connessione Minima”, si selezioni un nodo di partenza ("Start") e un nodo di arrivo ("End") dagli appositi menù a tendina.
+- Si implementi un algoritmo che utilizzi la visita del grafo più opportuna per identificare il cammino minimo (in termini di numero di archi attraversati) che connette il nodo Start al nodo End.
+- Se i nodi sono connessi, si mostri a schermo il cammino completo e il numero totale di tappe.
+- Se i due nodi appartengono a componenti disconnesse, si informi l'utente con un messaggio di errore.
+```
+import networkx as nx
+
+def getCamminoMinimoBFS(self, source, target):
+    # 1. Controlliamo se esiste una strada tra i due nodi prima di iniziare
+    if not nx.has_path(self._graph, source, target):
+        return None # I nodi non sono connessi
+        
+    # 2. Creiamo l'albero BFS partendo dalla sorgente
+    # La BFS garantisce il cammino minimo per numero di archi
+    albero_bfs = nx.bfs_tree(self._graph, source)
+    
+    # 3. Generiamo il dizionario dei predecessori per questo albero
+    predecessori = nx.predecessor(albero_bfs, source)
+    
+    # 4. Ricostruiamo il cammino partendo dal fondo (target) verso la sorgente
+    cammino = [target]
+    
+    while cammino[0] != source:
+        # Recuperiamo il padre del nodo attualmente in cima alla lista
+        padre = predecessori[cammino[0]][0]
+        # Lo inseriamo in testa
+        cammino.insert(0, padre)
+        
+    return cammino
+```
+
