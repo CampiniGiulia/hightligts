@@ -594,4 +594,54 @@ peso >= del precedente).
                         parziale.pop()
                         daVisitare.append(n)
 ```
+-------------------------------------------------------------------------------------------------------------------------
+### ricorsione per le componenti connesse
+### Soluzione:
+```
+import networkx as nx
+
+# --- FUNZIONE 1: L'ESPLORATORE RICORSIVO (DFS) ---
+def esplora_componente_dfs(nodo, G, visitati, componente_attuale):
+    """
+    Questa funzione si occupa solo di andare in profondità nel grafo,
+    riempire il set della componente attuale e aggiornare i visitati.
+    """
+    # 1. Segnamo il nodo corrente sia come visitato globale che nella componente
+    visitati.add(nodo)
+    componente_attuale.add(nodo)
+    
+    # 2. Esploriamo tutti i vicini del nodo corrente
+    for vicino in G.neighbors(nodo):
+        if vicino not in visitati:
+            # Chiamata ricorsiva passandogli gli stessi set (i "secchi condivisi")
+            esplora_componente_dfs(vicino, G, visitati, componente_attuale)
+
+
+# --- FUNZIONE 2: IL COORDINATORE PRINCIPALE ---
+def calcola_componenti_ricorsivo(G):
+    """
+    Questa è la funzione principale che coordina tutto il processo
+    e restituisce la lista finale delle componenti connesse.
+    """
+    visitati = set()          # All'inizio è VUOTO al 100%
+    componenti_connesse = []  # Conterrà i set di ogni componente
+
+    # Ciclo principale su tutti i nodi del grafo
+    for nodo in G.nodes:
+        # Quando 'A' arriva qui, visitati è vuoto, quindi ENTRA nell'if
+        if nodo not in visitati:
+            
+            # 1. Creiamo il set vuoto per questa specifica componente
+            componente_corrente = set()
+            
+            # 2. CHIAMIAMO LA FUNZIONE ESTERNA.
+            # Solo a questo punto il codice salta alla Funzione 1 e inizia a riempire 'visitati'
+            esplora_componente_dfs(nodo, G, visitati, componente_corrente)
+            
+            # 3. La Funzione 1 ha finito e ha riempito 'componente_corrente'. 
+            # Ora la salviamo nella lista globale.
+            componenti_connesse.append(componente_corrente)
+
+    return components_connesse
+```
 
