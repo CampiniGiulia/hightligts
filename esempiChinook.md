@@ -1,3 +1,66 @@
+# Esempi con itunes
+1. si crei un graf semplice, orientato e pesato,
+   - i cui vertici sono tutti gli
+album musicali (tabella Album) che durano in totale più di
+n secondi. A tal proposito, si consideri la durata (espressa
+in millisecondi) di ogni singola canzone (colonna
+milliseconds, tabella Track):
+```
+SELECT distinct a.AlbumId, a.Title, a.ArtistId 
+FROM Album a, Track t 
+WHERE t.AlbumId = a.AlbumId 
+group by a.AlbumId,   a.Title, a.ArtistId 
+having (sum(t.Milliseconds )/1000)>9000
+```
+
+  - Due album a1 e a2 sono collegati tra loro da un arco se e
+solo se:
+• hanno una durata differente;
+• la somma delle loro durate è maggiore di 4*n.
+L’eventuale arco è orientato dall’album di durata minore
+verso l’album di durata maggiore, e il peso, sempre
+positivo, è definito come la somma delle durate di a1 e a2.
+```
+SELECT distinct t1.AlbumId, t2.AlbumId, (t1.durata +t2.durata ) as peso
+FROM (SELECT a.AlbumId, (sum(t.Milliseconds)/1000) as durata 
+FROM Album a, Track t 
+WHERE t.AlbumId = a.AlbumId 
+group by a.AlbumId  
+having (sum(t.Milliseconds )/1000)>9000) t1,
+(SELECT a.AlbumId, (sum(t.Milliseconds)/1000) as durata 
+FROM Album a, Track t 
+WHERE t.AlbumId = a.AlbumId 
+group by a.AlbumId  
+having (sum(t.Milliseconds )/1000)>9000) t2
+where t1.AlbumId <> t2.AlbumId and t1.durata < t2.durata and (t1.durata +t2.durata ) >4*9000
+```
+2. si crei un grafo semplice, orientato e pesato,
+   - i cui vertici sono tutti gli album musicali (tabella Album) che contengono più di n canzoni (Track).
+
+```
+SELECT a.AlbumId, a.Title, a.ArtistId, count( t.TrackId ) as canz 
+FROM Album a, Track t 
+Where t.AlbumId = a.AlbumId  
+group by a.AlbumId, a.Title, a.ArtistId 
+having count( t.TrackId ) > 20
+```
+
+   - Per ogni coppia di album a1-a2, si consideri il loro  canzoni, definito come la differenza tra il numero di canzoni di a1 e il numero di canzoni di a2. I due album sono collegati tra di loro da un arco se e solo se tale differenza è diversa da 0. L’eventuale arco è orientato dall’album con meno canzoni verso l’album con più canzoni, e il peso, sempre positivo, è definito come il valore assoluto di  canzoni:
+```
+SELECT distinct t1.AlbumId, t2.AlbumId, (t2.canz - t1.canz)  as peso
+FROM (SELECT a.AlbumId, count( t.TrackId ) as canz 
+FROM Album a, Track t 
+Where t.AlbumId = a.AlbumId  
+group by a.AlbumId
+having count( t.TrackId ) > 20) t1,
+(SELECT a.AlbumId, count( t.TrackId ) as canz 
+FROM Album a, Track t 
+Where t.AlbumId = a.AlbumId  
+group by a.AlbumId 
+having count( t.TrackId ) > 20) t2
+WHERE t1.canz < t2.canz 
+```
+
 # Esempi di query CHINOOK
 - Tipologia: Grafo Non Orientato, Pesato
   1. Un utente seleziona un Genere Musicale (es. "Rock") da un menu a tendina.
