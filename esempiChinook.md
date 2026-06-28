@@ -155,6 +155,26 @@ Track t, PlaylistTrack pt
 WHERE t1.AlbumId = t.AlbumId and t.TrackId = pt.TrackId) a2
 where a1.AlbumId < a2.AlbumId and a1.PlaylistId = a2.PlaylistId
 ```
+6. si crei un grafo semplice, non orientato e pesato,
+   - i cui vertici sono tutte le canzoni (tabella Track) di genere g:
+```
+SELECT distinct t.*
+FROM Track t 
+where t.GenreId = 5
+```
+
+   - Due canzoni sono collegate tra loro se condividono lo stesso formato di file (MediaType). Il peso dell’arco, sempre positivo, rappresenta il valore assoluto della differenza di durata tra le due canzoni ( durata), espressa in millisecondi:
+```
+SELECT DISTINCT t1.TrackId, t2.TrackId, abs(t1.Milliseconds -t2.Milliseconds ) as peso
+FROM (SELECT distinct t.TrackId, t.MediaTypeId, t.Milliseconds 
+FROM Track t 
+where t.GenreId = 2) t1,
+(SELECT distinct t.TrackId, t.MediaTypeId, t.Milliseconds 
+FROM Track t 
+where t.GenreId = 2) t2
+WHERE t1.TrackId < t2.TrackId and t1.MediaTypeId = t2.MediaTypeId
+order by peso desc
+```
 
 
 # Esempi di query CHINOOK
