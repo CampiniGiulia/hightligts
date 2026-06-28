@@ -129,14 +129,17 @@ questi archi (la somma dei loro pesi). I nodi devono essere stampati in ordine d
         listaTuple.sort(key=lambda x: x[1], reverse=True)
         return listaTuple[:5]
 ```
-#### COMPONENETE CONNESSA per i grafo orientati: 
+#### COMPONENTE CONNESSA per i grafo orientati: 
 ```
 comp_forti = list(nx.strongly_connected_components(G))
 comp_deboli = list(nx.weakly_connected_components(G))
+comp_nodo = next((c for c in nx.strongly_connected_components(G) if nodo_target in c), None) #per comp con nodo_target
+nodi_raggiungibili = set(nx.bfs_tree(G, source=nodo_target)) # o faccio intersezione tra queste nodi_che_mi_raggiungono = set(nx.bfs_tree(G.reverse(), source=nodo_target))
 ```
 #### per quelli NON orientati:
 ```
 componenti = list(nx.connected_components(G)) #è un se sennò
+componente = nx.node_connected_component(G, nodo_target)
 ```
 
 
