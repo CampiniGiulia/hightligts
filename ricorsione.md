@@ -202,7 +202,92 @@ def getBestPath(self):
 - Ogni vertice può comparire una sola volta
 - Il peso degli archi nel percorso deve essere strettamente decrescente.
 
-### Soluzione: CERCO DI CAPIRE (BASEBALL)
+### Soluzione: 
+```
+    def getPercorso(self, team):
+        source = team
+        self.bestPercorso = []
+        self.bestScore = 0
+
+        # Inizializziamo il cammino solo con la sorgente
+        parziale = [source]
+
+        # Avviamo la ricorsione.
+        # Passiamo float('inf') come peso dell'ultimo arco,
+        # così il primo arco incontrato sarà sicuramente minore di "infinito".
+        self._ricorsione(parziale, peso_precedente=float('inf'), score_attuale=0)
+
+        return self.bestPercorso, self.bestScore
+
+    def _ricorsione(self, parziale, peso_precedente, score_attuale):
+
+        # Condizione di ottimalità: valutiamo ad ogni passo se abbiamo fatto meglio
+        if score_attuale > self.bestScore:
+            self.bestPercorso = copy.deepcopy(parziale)
+            print(score_attuale)
+            self.bestScore = score_attuale
+
+        # Esploriamo i vicini dell'ultimo nodo inserito
+        ultimo_nodo = parziale[-1]
+        for v in self._graph.neighbors(ultimo_nodo):
+            peso_arco = self._graph[ultimo_nodo][v]["weight"]
+
+            # Vincolo 1: Il peso dell'arco deve essere strettamente decrescente
+            # Vincolo 2: Il nodo non deve essere già stato visitato
+            if peso_arco < peso_precedente and v not in parziale:
+                # Backtracking
+                print("provo")
+                parziale.append(v)
+
+                # Ricorsione: aggiorniamo il peso precedente e sommiamo il peso al volo
+                self._ricorsione(parziale, peso_arco, score_attuale + peso_arco)
+
+                # Rimuoviamo il nodo per testare le altre strade
+                parziale.pop()
+    def score(self, parziale):
+        score = 0
+        for i in range(0, len(parziale)-1):
+            score += self._graph[parziale[i]][parziale[i+1]]["weight"]
+        return score
+
+    def getPathV2(self, v0):
+        self._bestPath = []
+        self._bestObjVal = 0
+
+        parziale = [v0]
+
+        listaVicini = self.getDetails(parziale[-1])
+        parziale.append(listaVicini[0][0])
+        self._ricorsioneV2(parziale)
+
+        return self._bestPath, self._bestObjVal
+
+    def _ricorsioneV2(self, parziale):
+        # 1 condizione di ottimalità, verifico se la parziale è migliore del best
+        if self.score(parziale) > self._bestObjVal:
+            self._bestPath = copy.deepcopy(parziale)
+            self._bestObjVal = self.score(parziale)
+
+        # 2 condizione di terminazione, verifico se posso continuare
+
+        # 3 faccio la mia ricorsione
+        # listaVicini = []
+        # for v in self._grafo.neighbors(parziale[-1]):
+        #     edgeV = self._grafo[parziale[-1]][v]["weight"]
+        #     listaVicini.append((v, edgeV))
+        #
+        # listaVicini.sort(key= lambda x: x[1], reverse=True)
+
+        listaVicini = self.getDetails(parziale[-1])
+
+        for v in listaVicini:
+            if v[0] not in parziale and self._graph[parziale[-2]][parziale[-1]]["weight"] > v[1]:
+                parziale.append(v[0])
+                self._ricorsioneV2(parziale)
+                parziale.pop()
+                return
+```
+
 
 -------------------------------------------------------------------------------------------------------------------------
 ### Calcolare un percorso di peso massimo avente le seguenti caratteristiche:
