@@ -429,6 +429,7 @@ crescente. La densità di popolazione è calcolata come Population/Area (Colonne
 - Nel cammino, non ci possono essere due geni consecutivi con lo stesso valore del campo Essential
 - Si possono attraversare solo archi di peso crescente (ovvero ogni nuovo arco percorso deve avere
 peso >= del precedente).
+### Soluzione (mia):
 ```
     def getBestPath(self):
         self._bestSoluzione = []
@@ -462,5 +463,50 @@ peso >= del precedente).
         for n in range(0, len(parziale)-1):
             tot += self._graph[parziale[n]][parziale[n+1]]["weight"]
         return tot
+```
+-------------------------------------------------------------------------------------------------------------------------
+### Si implementi una procedura ricorsiva che sia in grado di identificare una lista di nodi appartenenti al grafo di cui al punto 1, tale per cui siano verificate le seguenti richieste:
+- I nodi devono essere presentati nella lista ordinati in senso crescente di GeneID
+-  I nodi devono essere o tutti “Essenziali” oppure tutti “Non-Essenziali”. Vanno esclusi i nodi per i quali
+     l’essenzialità non è nota (ovvero in cui il campo è “?”)
+- La soluzione proposta deve massimizzare il numero di elementi nella lista.
+- A parità di lunghezza della soluzione, il numero di componenti connesse del sottografo ottenuto considerando solo i nodi del set trovato deve essere minimo (hint: usare il metodo Graph.subgraph())
+### Soluzione (mia):
+```
+    def getLista(self):
+       #si può migliorare ordinando prima i geneID e selezionando solo quelli con il campo giusto
+        self._bestSoluzione = []
+        self._compConnesse = 0
+        parziale = []
+        daVisitare = copy.deepcopy(self._graph.nodes)
+        for nodi in daVisitare:
+            if nodi.essential == "Essential" or nodi.essential == "Non-Essential":
+                parziale.append(nodi)
+                daVisitare.remove(nodi)
+                self._ricorsione(parziale, nodi.essential, daVisitare)
+                parziale.pop()
+                daVisitare.append(nodi)
+        return self._bestSoluzione
+
+    def _ricorsione(self, parziale, tipo, daVisitare):
+        #con. ottimale
+        if len(parziale) > len(self._bestSoluzione):
+            self._bestSoluzione = copy.deepcopy(parziale)
+
+        elif len(parziale) == len(self._bestSoluzione):
+            compConn = list(nx.connected_components(self._graph.subgraph(parziale)))
+            if len(compConn) < self._compConnesse:
+                self._compConnesse = len(compConn)
+                self._bestSoluzione = copy.deepcopy(parziale)
+
+        for n in daVisitare:
+            if n.essential == tipo:
+                if n.GeneID > parziale[-1].GeneID:
+                    if n not in parziale:
+                        parziale.append(n)
+                        daVisitare.remove(n)
+                        self._ricorsione(parziale, n.essential, daVisitare)
+                        parziale.pop()
+                        daVisitare.append(n)
 ```
 
