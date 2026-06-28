@@ -93,6 +93,37 @@ WHERE t.TrackId = pt.TrackId
 group by t.TrackId) t2
 WHERE t1.TrackId < t2.TrackId and t1.num = t2.num
 ```
+4. crei un grafo semplice, non orientato e nonpesato,
+   - i cui vertici sono tutti gli album musicali (tabella Album) la cui durata media dei brani ad esso appartenenti sia superiore a d:
+```
+SELECT a.AlbumId 
+FROM Album a, Track t 
+WHERE t.AlbumId = a.AlbumId 
+Group by a.AlbumId 
+Having avg(t.Milliseconds/1000) > 300
+```
+
+   - Due album a1 e a2 sono collegati tra loro se almeno una canzone di a1 e una canzone di a2 sono state inserite da un utente all’interno di una stessa playlist (tabella PlaylistTrack):
+```
+SELECT distinct a1.AlbumId, a2.AlbumId 
+FROM (SELECT distinct t1.AlbumId, pt.PlaylistId 
+FROM (SELECT a.AlbumId 
+FROM Album a, Track t 
+WHERE t.AlbumId = a.AlbumId 
+Group by a.AlbumId 
+Having avg(t.Milliseconds/1000) > 300) t1,
+Track t, PlaylistTrack pt 
+WHERE t1.AlbumId = t.AlbumId and t.TrackId = pt.TrackId) a1,
+(SELECT distinct t1.AlbumId, pt.PlaylistId 
+FROM (SELECT a.AlbumId 
+FROM Album a, Track t 
+WHERE t.AlbumId = a.AlbumId 
+Group by a.AlbumId 
+Having avg(t.Milliseconds/1000) > 300) t1,
+Track t, PlaylistTrack pt 
+WHERE t1.AlbumId = t.AlbumId and t.TrackId = pt.TrackId) a2
+where a1.AlbumId < a2.AlbumId and a1.PlaylistId = a2.PlaylistId 
+```
 
 
 # Esempi di query CHINOOK
