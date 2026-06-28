@@ -141,6 +141,42 @@ nodi_raggiungibili = set(nx.bfs_tree(G, source=nodo_target)) # o faccio intersez
 componenti = list(nx.connected_components(G)) #è un se sennò
 componente = nx.node_connected_component(G, nodo_target)
 ```
+- **componenti connesse senza metodo diretto**:
+```
+import networkx as nx
+
+def calcola_componenti_connesse_manuale(G):
+    visitati = set()          # Tiene traccia di tutti i nodi già esplorati
+    componenti_connesse = []  # Conterrà la lista di set (le nostre componenti)
+
+    # Cicliamo su tutti i nodi del grafo
+    for nodo in G.nodes:
+        # Se il nodo non è ancora stato visitato, abbiamo trovato una NUOVA componente!
+        if nodo not in visitati:
+            componente_corrente = set()
+            
+            # Facciamo partire una visita (BFS) usando le funzioni di NetworkX 
+            # nx.bfs_tree ci restituisce l'albero di tutti i nodi raggiungibili da 'nodo'
+            albero_visita = nx.bfs_tree(G, source=nodo)
+            
+            # Tutti i nodi scoperti in questa visita appartengono a questa componente
+            for nodo_raggiunto in albero_visita:
+                componente_corrente.add(nodo_raggiunto)
+                visitati.add(nodo_raggiunto) # Li segnamo come visitati globali
+            
+            # Aggiungiamo la componente trovata alla nostra lista
+            componenti_connesse.append(componente_corrente)
+            
+    return componenti_connesse
+
+# --- Esempio di utilizzo ---
+G = nx.Graph()
+G.add_edges_from([(1, 2), (2, 3), (4, 5)]) # Grafo con due componenti: {1,2,3} e {4,5}
+
+risultato = calcola_componenti_connesse_manuale(G)
+print(risultato) 
+# Output: [{1, 2, 3}, {4, 5}]
+```
 
 
 
