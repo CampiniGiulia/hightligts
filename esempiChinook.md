@@ -60,6 +60,40 @@ group by a.AlbumId
 having count( t.TrackId ) > 20) t2
 WHERE t1.canz < t2.canz 
 ```
+3. costruire un grafo semplice, non orientato e non pesato,
+   - i cui vertici siano le Track che soddisfino i criteri di genere e di durata sopra specificati:
+```
+SELECT t.TrackId
+FROM Track t 
+WHERE t.GenreId = 2 
+Group by t.TrackId
+having (sum(t.Milliseconds)/1000) between 240 and 360
+```
+
+   - Ogni coppia di vertici è collegata da un arco, se e solo se il numero distinto di playlist in cui ciascuno dei brani corrispondenti ai due vertici è uguale.
+```
+SELECT distinct t1.TrackId, t2.TrackId, t1.num 
+FROM (SELECT t.TrackId, count(distinct pt.PlaylistId) as num
+FROM  PlaylistTrack pt,  
+(SELECT t.TrackId
+FROM Track t 
+WHERE t.GenreId = 2 
+Group by t.TrackId
+having (sum(t.Milliseconds)/1000) between 240 and 360 ) t
+WHERE t.TrackId = pt.TrackId 
+group by t.TrackId) t1,
+(SELECT t.TrackId, count(distinct pt.PlaylistId) as num
+FROM  PlaylistTrack pt,  
+(SELECT t.TrackId
+FROM Track t 
+WHERE t.GenreId = 2 
+Group by t.TrackId
+having (sum(t.Milliseconds)/1000) between 240 and 360 ) t
+WHERE t.TrackId = pt.TrackId 
+group by t.TrackId) t2
+WHERE t1.TrackId < t2.TrackId and t1.num = t2.num
+```
+
 
 # Esempi di query CHINOOK
 - Tipologia: Grafo Non Orientato, Pesato
